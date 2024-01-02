@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"jlowell000.github.io/budgeting/internal/model/period"
 )
 
 const (
@@ -19,7 +20,7 @@ const (
 
 func TestPeriodicFlowToJSON(t *testing.T) {
 	id, timestamp := getParsedValues()
-	for _, p := range Periods {
+	for _, p := range period.Periods {
 		expected := getTestJson(TEST_PF_ID, TEST_PF_NAME, TEST_PF_AMOUNT, p, TEST_PF_AMOUNT, TEST_PF_TIME)
 		periodicFlow := PeriodicFlow{
 			Id:               id,
@@ -38,7 +39,7 @@ func TestPeriodicFlowToJSON(t *testing.T) {
 func TestPeriodicFlowFromJSON_data_there(t *testing.T) {
 	id, timestamp := getParsedValues()
 
-	for _, p := range Periods {
+	for _, p := range period.Periods {
 		expected := PeriodicFlow{
 			Id:               id,
 			Name:             TEST_PF_NAME,
@@ -58,7 +59,7 @@ func TestPeriodicFlowFromJSON_data_there(t *testing.T) {
 func TestPeriodicFlowFromJSON_partial_data_there(t *testing.T) {
 	id, timestamp := getParsedValues()
 
-	for _, p := range Periods {
+	for _, p := range period.Periods {
 		expected := PeriodicFlow{
 			Id:               id,
 			Amount:           TEST_PF_AMOUNT,
@@ -97,7 +98,7 @@ func getTestJson(
 	id string,
 	name string,
 	amount float64,
-	p Period,
+	p period.Period,
 	weeklyAmount float64,
 	time string,
 ) string {

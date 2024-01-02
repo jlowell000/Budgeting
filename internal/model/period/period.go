@@ -1,4 +1,4 @@
-package model
+package period
 
 import (
 	"strings"

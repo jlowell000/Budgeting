@@ -7,15 +7,16 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"jlowell000.github.io/budgeting/internal/model/period"
 )
 
 type PeriodicFlow struct {
-	Id               uuid.UUID `json:"id"`
-	Name             string    `json:"name,omitempty"`
-	Amount           float64   `json:"amount,omitempty"`
-	Period           Period    `json:"period"`
-	WeeklyAmount     float64   `json:"weekly_amount,omitempty"`
-	UpdatedTimestamp time.Time `json:"updated_timestamp,omitempty"`
+	Id               uuid.UUID     `json:"id"`
+	Name             string        `json:"name,omitempty"`
+	Amount           float64       `json:"amount,omitempty"`
+	Period           period.Period `json:"period"`
+	WeeklyAmount     float64       `json:"weekly_amount,omitempty"`
+	UpdatedTimestamp time.Time     `json:"updated_timestamp,omitempty"`
 }
 
 // Returns JSON encoding of PeriodicFlow
