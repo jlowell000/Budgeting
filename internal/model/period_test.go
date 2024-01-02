@@ -30,8 +30,8 @@ func TestPeriodFromJSON_data_there(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
-func TestPeriodFromJSON_no_data_defaults_to_weekly(t *testing.T) {
-	expected := Weekly // is 0th therefore default enum
+func TestPeriodFromJSON_no_data_defaults_to_unknown(t *testing.T) {
+	expected := Unknown // is 0th therefore default enum
 	var actual Period
 	json.Unmarshal([]byte(""), &actual)
 	assert.Equal(t, expected, actual)
