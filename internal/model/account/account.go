@@ -48,6 +48,19 @@ func Sum(accounts []Account) decimal.Decimal {
 	return sum
 }
 
+/*
+Sum the given Accounts' amounts excludes all Excludable accounts
+*/
+func SumExclusion(accounts []Account) decimal.Decimal {
+	sum := decimal.NewFromInt(0)
+	for _, a := range accounts {
+		if !a.Excludable {
+			sum = sum.Add(a.GetLatestBookEntry().Amount)
+		}
+	}
+	return sum
+}
+
 // Returns JSON encoding of Account
 func (account *Account) GetLatestBookEntry() bookentry.BookEntry {
 
