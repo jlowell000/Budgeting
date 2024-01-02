@@ -32,7 +32,7 @@ func (flow *PeriodicFlow) ToJSON() []byte {
 }
 
 // Parses an PeriodicFlow from JSON
-func PeriodicFlowFromJSON(data []byte) PeriodicFlow {
+func FromJSON(data []byte) PeriodicFlow {
 	var flow PeriodicFlow
 	json.Unmarshal(data, &flow)
 	return flow
