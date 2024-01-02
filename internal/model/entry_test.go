@@ -1,11 +1,8 @@
 package model
 
 import (
-	"log"
 	"testing"
-	"time"
 
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -17,7 +14,7 @@ const (
 )
 
 func TestEntryToJSON(t *testing.T) {
-	id, timestamp := getParsedValues()
+	id, timestamp := GetParsedValues()
 
 	expected := TEST_JSON
 	entry := Entry{
@@ -31,7 +28,7 @@ func TestEntryToJSON(t *testing.T) {
 }
 
 func TestEntryFromJSON_data_there(t *testing.T) {
-	id, timestamp := getParsedValues()
+	id, timestamp := GetParsedValues()
 
 	expected := Entry{
 		Id:        id,
@@ -48,16 +45,4 @@ func TestEntryFromJSON_no_data(t *testing.T) {
 	actual := EntryFromJSON([]byte(""))
 
 	assert.Equal(t, expected, actual)
-}
-
-func getParsedValues() (uuid.UUID, time.Time) {
-	id, err1 := uuid.Parse(TEST_ID)
-	if err1 != nil {
-		log.Fatal(err1)
-	}
-	timestamp, err2 := time.Parse(time.RFC3339, TEST_TIME)
-	if err2 != nil {
-		log.Fatal(err2)
-	}
-	return id, timestamp
 }
