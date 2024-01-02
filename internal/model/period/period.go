@@ -51,13 +51,33 @@ func PeriodFromText(text string) Period {
 	switch strings.ToLower(text) {
 	default:
 		return Unknown
+	case "daily":
+		return Daily
 	case "weekly":
 		return Weekly
 	case "monthly":
 		return Monthly
 	case "yearly":
 		return Yearly
-	case "daily":
-		return Daily
+	}
+}
+
+/*
+Get the Period for a given string.
+*/
+func (p *Period) WeeklyAmount() float64 {
+	switch *p {
+	default:
+		return 0.0
+	case Unknown:
+		return 0.0
+	case Daily:
+		return 1 / 7
+	case Weekly:
+		return 1
+	case Monthly:
+		return 52 / 12
+	case Yearly:
+		return 52
 	}
 }
