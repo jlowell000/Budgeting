@@ -15,6 +15,7 @@ Struct for defining a Account.
 type Account struct {
 	Id               uuid.UUID             `json:"id"`
 	Name             string                `json:"name,omitempty"`
+	Excludable       bool                  `json:"excludable"`
 	Book             []bookentry.BookEntry `json:"book,omitempty"`
 	UpdatedTimestamp time.Time             `json:"updated_timestamp,omitempty"`
 }

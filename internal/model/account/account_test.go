@@ -14,6 +14,7 @@ import (
 const (
 	TEST_ID     = "16cfd708-db6d-42fd-8ad1-55316690520c"
 	TEST_NAME   = "test name"
+	TEST_FLAG   = false
 	TEST_AMOUNT = 100.99
 	TEST_TIME   = "2006-01-23T15:04:05Z"
 )
@@ -22,10 +23,11 @@ func TestAccountToJSON(t *testing.T) {
 	id := getUUID(TEST_ID)
 	timestamp := getTime(TEST_TIME)
 
-	expected := getTestJson(TEST_ID, TEST_NAME, TEST_AMOUNT, TEST_TIME)
+	expected := getTestJson(TEST_ID, TEST_NAME, TEST_FLAG, TEST_AMOUNT, TEST_TIME)
 	periodicFlow := Account{
-		Id:   id,
-		Name: TEST_NAME,
+		Id:         id,
+		Name:       TEST_NAME,
+		Excludable: TEST_FLAG,
 		Book: []bookentry.BookEntry{
 			{
 				Id:        id,
@@ -45,8 +47,9 @@ func TestAccountFromJSON_data_there(t *testing.T) {
 	timestamp := getTime(TEST_TIME)
 
 	expected := Account{
-		Id:   id,
-		Name: TEST_NAME,
+		Id:         id,
+		Name:       TEST_NAME,
+		Excludable: TEST_FLAG,
 		Book: []bookentry.BookEntry{
 			{
 				Id:        id,
@@ -57,7 +60,7 @@ func TestAccountFromJSON_data_there(t *testing.T) {
 		UpdatedTimestamp: timestamp,
 	}
 	actual := FromJSON([]byte(
-		getTestJson(TEST_ID, TEST_NAME, TEST_AMOUNT, TEST_TIME),
+		getTestJson(TEST_ID, TEST_NAME, TEST_FLAG, TEST_AMOUNT, TEST_TIME),
 	))
 
 	assert.Equal(t, expected, actual)
@@ -79,7 +82,7 @@ func TestAccountFromJSON_partial_data_there(t *testing.T) {
 		UpdatedTimestamp: timestamp,
 	}
 	actual := FromJSON([]byte(
-		getTestJson(TEST_ID, "", TEST_AMOUNT, TEST_TIME),
+		getTestJson(TEST_ID, "", TEST_FLAG, TEST_AMOUNT, TEST_TIME),
 	))
 
 	assert.Equal(t, expected, actual)
@@ -107,11 +110,13 @@ func getPFParsedValues() (uuid.UUID, time.Time) {
 func getTestJson(
 	id string,
 	name string,
+	excludable bool,
 	amount float64,
 	time string,
 ) string {
 	return "{\"id\":\"" + id + "\"," +
 		"\"name\":\"" + name + "\"," +
+		"\"excludable\":" + fmt.Sprintf("%t", excludable) + "," +
 		"\"book\":[" +
 		"{\"id\":\"" + id +
 		"\",\"amount\":" + fmt.Sprintf("%.2f", amount) +
