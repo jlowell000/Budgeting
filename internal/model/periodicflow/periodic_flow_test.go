@@ -12,23 +12,23 @@ import (
 )
 
 const (
-	TEST_PF_ID     = "16cfd708-db6d-42fd-8ad1-55316690520c"
-	TEST_PF_NAME   = "test name"
-	TEST_PF_AMOUNT = 100.99
-	TEST_PF_TIME   = "2006-01-23T15:04:05Z"
+	TEST_ID     = "16cfd708-db6d-42fd-8ad1-55316690520c"
+	TEST_NAME   = "test name"
+	TEST_AMOUNT = 100.99
+	TEST_TIME   = "2006-01-23T15:04:05Z"
 )
 
 func TestPeriodicFlowToJSON(t *testing.T) {
-	id := getUUID(TEST_PF_ID)
-	timestamp := getTime(TEST_PF_TIME)
+	id := getUUID(TEST_ID)
+	timestamp := getTime(TEST_TIME)
 	for _, p := range period.Periods {
-		expected := getTestJson(TEST_PF_ID, TEST_PF_NAME, TEST_PF_AMOUNT, p, TEST_PF_AMOUNT, TEST_PF_TIME)
+		expected := getTestJson(TEST_ID, TEST_NAME, TEST_AMOUNT, p, TEST_AMOUNT, TEST_TIME)
 		periodicFlow := PeriodicFlow{
 			Id:               id,
-			Name:             TEST_PF_NAME,
-			Amount:           TEST_PF_AMOUNT,
+			Name:             TEST_NAME,
+			Amount:           TEST_AMOUNT,
 			Period:           p,
-			WeeklyAmount:     TEST_PF_AMOUNT,
+			WeeklyAmount:     TEST_AMOUNT,
 			UpdatedTimestamp: timestamp,
 		}
 		actual := string(periodicFlow.ToJSON())
@@ -38,20 +38,20 @@ func TestPeriodicFlowToJSON(t *testing.T) {
 }
 
 func TestPeriodicFlowFromJSON_data_there(t *testing.T) {
-	id := getUUID(TEST_PF_ID)
-	timestamp := getTime(TEST_PF_TIME)
+	id := getUUID(TEST_ID)
+	timestamp := getTime(TEST_TIME)
 
 	for _, p := range period.Periods {
 		expected := PeriodicFlow{
 			Id:               id,
-			Name:             TEST_PF_NAME,
-			Amount:           TEST_PF_AMOUNT,
+			Name:             TEST_NAME,
+			Amount:           TEST_AMOUNT,
 			Period:           p,
-			WeeklyAmount:     TEST_PF_AMOUNT,
+			WeeklyAmount:     TEST_AMOUNT,
 			UpdatedTimestamp: timestamp,
 		}
-		actual := PeriodicFlowFromJSON([]byte(
-			getTestJson(TEST_PF_ID, TEST_PF_NAME, TEST_PF_AMOUNT, p, TEST_PF_AMOUNT, TEST_PF_TIME),
+		actual := FromJSON([]byte(
+			getTestJson(TEST_ID, TEST_NAME, TEST_AMOUNT, p, TEST_AMOUNT, TEST_TIME),
 		))
 
 		assert.Equal(t, expected, actual)
@@ -59,19 +59,19 @@ func TestPeriodicFlowFromJSON_data_there(t *testing.T) {
 }
 
 func TestPeriodicFlowFromJSON_partial_data_there(t *testing.T) {
-	id := getUUID(TEST_PF_ID)
-	timestamp := getTime(TEST_PF_TIME)
+	id := getUUID(TEST_ID)
+	timestamp := getTime(TEST_TIME)
 
 	for _, p := range period.Periods {
 		expected := PeriodicFlow{
 			Id:               id,
-			Amount:           TEST_PF_AMOUNT,
+			Amount:           TEST_AMOUNT,
 			Period:           p,
-			WeeklyAmount:     TEST_PF_AMOUNT,
+			WeeklyAmount:     TEST_AMOUNT,
 			UpdatedTimestamp: timestamp,
 		}
-		actual := PeriodicFlowFromJSON([]byte(
-			getTestJson(TEST_PF_ID, "", TEST_PF_AMOUNT, p, TEST_PF_AMOUNT, TEST_PF_TIME),
+		actual := FromJSON([]byte(
+			getTestJson(TEST_ID, "", TEST_AMOUNT, p, TEST_AMOUNT, TEST_TIME),
 		))
 
 		assert.Equal(t, expected, actual)
@@ -80,17 +80,17 @@ func TestPeriodicFlowFromJSON_partial_data_there(t *testing.T) {
 
 func TestPeriodicFlowFromJSON_no_data(t *testing.T) {
 	expected := PeriodicFlow{}
-	actual := PeriodicFlowFromJSON([]byte(""))
+	actual := FromJSON([]byte(""))
 
 	assert.Equal(t, expected, actual)
 }
 
 func getPFParsedValues() (uuid.UUID, time.Time) {
-	id, err1 := uuid.Parse(TEST_PF_ID)
+	id, err1 := uuid.Parse(TEST_ID)
 	if err1 != nil {
 		log.Fatal(err1)
 	}
-	timestamp, err2 := time.Parse(time.RFC3339, TEST_PF_TIME)
+	timestamp, err2 := time.Parse(time.RFC3339, TEST_TIME)
 	if err2 != nil {
 		log.Fatal(err2)
 	}

@@ -9,13 +9,13 @@ import (
 )
 
 const (
-	TEST_P_PERIOD      = Weekly
-	TEST_P_PERIOD_NAME = "\"Weekly\""
+	TEST_PERIOD      = Weekly
+	TEST_PERIOD_NAME = "\"Weekly\""
 )
 
 func TestPeriodToJSON(t *testing.T) {
-	expected := TEST_P_PERIOD_NAME
-	actual, err := json.Marshal(TEST_P_PERIOD)
+	expected := TEST_PERIOD_NAME
+	actual, err := json.Marshal(TEST_PERIOD)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -24,9 +24,9 @@ func TestPeriodToJSON(t *testing.T) {
 }
 
 func TestPeriodFromJSON_data_there(t *testing.T) {
-	expected := TEST_P_PERIOD
+	expected := TEST_PERIOD
 	var actual Period
-	json.Unmarshal([]byte(TEST_P_PERIOD_NAME), &actual)
+	json.Unmarshal([]byte(TEST_PERIOD_NAME), &actual)
 	assert.Equal(t, expected, actual)
 }
 

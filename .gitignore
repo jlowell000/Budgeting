@@ -21,3 +21,4 @@
 go.work
 cmd/cli/Budgeting
 cmd/cli/entrylist.json
+stringer
