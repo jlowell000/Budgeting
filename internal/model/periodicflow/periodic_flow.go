@@ -22,7 +22,9 @@ type PeriodicFlow struct {
 	UpdatedTimestamp time.Time     `json:"updated_timestamp,omitempty"`
 }
 
-// Returns PeriodicFlow of PeriodicFlow
+/*
+Returns PeriodicFlow of PeriodicFlow
+*/
 func New(
 	id uuid.UUID,
 	amount float64,
@@ -38,7 +40,9 @@ func New(
 	}
 }
 
-// Returns JSON encoding of PeriodicFlow
+/*
+Returns JSON encoding of PeriodicFlow
+*/
 func (flow *PeriodicFlow) ToJSON() []byte {
 	data, err := json.Marshal(flow)
 	if err != nil {
@@ -47,18 +51,29 @@ func (flow *PeriodicFlow) ToJSON() []byte {
 	return data
 }
 
-// Parses an PeriodicFlow from JSON
+/*
+Parses an PeriodicFlow from JSON
+*/
 func FromJSON(data []byte) PeriodicFlow {
 	var flow PeriodicFlow
 	json.Unmarshal(data, &flow)
 	return flow
 }
 
-// Sum the given Periodic Flows' weekly amounts
+/*
+Sum the given Periodic Flows' weekly amounts
+*/
 func Sum(flows []PeriodicFlow) float64 {
 	sum := 0.0
 	for _, f := range flows {
 		sum += f.WeeklyAmount
 	}
 	return sum
+}
+
+/*
+Calculate projected change over time
+*/
+func ProjectedChange(flows []PeriodicFlow, amount float64, period period.Period) float64 {
+	return Sum(flows) * period.WeeklyAmount() * amount
 }
