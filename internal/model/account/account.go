@@ -35,3 +35,30 @@ func FromJSON(data []byte) Account {
 	json.Unmarshal(data, &account)
 	return account
 }
+
+/*
+Sum the given Accounts' amounts
+*/
+// func Sum(accounts []Account) float64 {
+// 	sum := 0.0
+// 	for _, a := range accounts {
+// 		// sum += a.Book
+// 	}
+// 	return sum
+// }
+
+// Returns JSON encoding of Account
+func (account *Account) GetLatestBookEntry() bookentry.BookEntry {
+
+	var bookentry bookentry.BookEntry
+	for _, b := range account.Book {
+		if b.Timestamp.After(bookentry.Timestamp) {
+			bookentry = b
+		}
+	}
+	return bookentry
+}
+
+func (a *Account) String() string {
+	return string(a.ToJSON())
+}

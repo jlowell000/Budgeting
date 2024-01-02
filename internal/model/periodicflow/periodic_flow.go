@@ -77,3 +77,7 @@ Calculate projected change over time
 func ProjectedChange(flows []PeriodicFlow, amount float64, period period.Period) float64 {
 	return Sum(flows) * period.WeeklyAmount() * amount
 }
+
+func (p *PeriodicFlow) String() string {
+	return string(p.ToJSON())
+}

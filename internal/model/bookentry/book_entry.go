@@ -32,3 +32,7 @@ func FromJSON(data []byte) BookEntry {
 	json.Unmarshal(data, &bookEntry)
 	return bookEntry
 }
+
+func (b *BookEntry) String() string {
+	return string(b.ToJSON())
+}

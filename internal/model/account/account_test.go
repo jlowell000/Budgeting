@@ -95,6 +95,46 @@ func TestAccountFromJSON_no_data(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
+func Test_GetLatestBookEntry(t *testing.T) {
+	id := getUUID(TEST_ID)
+	timestamp := getTime(TEST_TIME)
+	expected := bookentry.BookEntry{
+		Id:        uuid.New(),
+		Amount:    666.6,
+		Timestamp: time.Now(),
+	}
+	account := Account{
+		Id: id,
+		Book: []bookentry.BookEntry{
+			{
+				Id:        uuid.New(),
+				Amount:    TEST_AMOUNT,
+				Timestamp: timestamp,
+			},
+			{
+				Id:        uuid.New(),
+				Amount:    TEST_AMOUNT,
+				Timestamp: timestamp,
+			},
+			expected,
+			{
+				Id:        uuid.New(),
+				Amount:    TEST_AMOUNT,
+				Timestamp: timestamp,
+			},
+			{
+				Id:        uuid.New(),
+				Amount:    TEST_AMOUNT,
+				Timestamp: timestamp,
+			},
+		},
+		UpdatedTimestamp: timestamp,
+	}
+	actual := account.GetLatestBookEntry()
+
+	assert.Equal(t, expected, actual)
+}
+
 func getPFParsedValues() (uuid.UUID, time.Time) {
 	id, err1 := uuid.Parse(TEST_ID)
 	if err1 != nil {
