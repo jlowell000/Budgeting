@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	"jlowell000.github.io/budgeting/internal/model/bookentry"
 )
 
@@ -39,13 +40,13 @@ func FromJSON(data []byte) Account {
 /*
 Sum the given Accounts' amounts
 */
-// func Sum(accounts []Account) float64 {
-// 	sum := 0.0
-// 	for _, a := range accounts {
-// 		// sum += a.Book
-// 	}
-// 	return sum
-// }
+func Sum(accounts []Account) decimal.Decimal {
+	sum := decimal.NewFromInt(0)
+	for _, a := range accounts {
+		sum = sum.Add(a.GetLatestBookEntry().Amount)
+	}
+	return sum
+}
 
 // Returns JSON encoding of Account
 func (account *Account) GetLatestBookEntry() bookentry.BookEntry {

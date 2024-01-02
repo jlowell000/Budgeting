@@ -1,21 +1,22 @@
 package bookentry
 
 import (
-	"fmt"
 	"log"
 	"testing"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 )
 
 const (
-	TEST_ID     = "16cfd708-db6d-42fd-8ad1-55316690520c"
-	TEST_NAME   = "test name"
-	TEST_AMOUNT = 100.99
-	TEST_TIME   = "2006-01-23T15:04:05Z"
+	TEST_ID   = "16cfd708-db6d-42fd-8ad1-55316690520c"
+	TEST_NAME = "test name"
+	TEST_TIME = "2006-01-23T15:04:05Z"
 )
+
+var TEST_AMOUNT = decimal.NewFromFloat(100.99)
 
 func TestAccountToJSON(t *testing.T) {
 	id := getUUID(TEST_ID)
@@ -83,12 +84,12 @@ func getPFParsedValues() (uuid.UUID, time.Time) {
 
 func getTestJson(
 	id string,
-	amount float64,
+	amount decimal.Decimal,
 	time string,
 ) string {
-	return "{\"id\":\"" + id +
-		"\",\"amount\":" + fmt.Sprintf("%.2f", amount) +
-		",\"timestamp\":\"" + time + "\"}"
+	return "{\"id\":\"" + id + "\"," +
+		"\"amount\":\"" + amount.String() + "\"," +
+		"\"timestamp\":\"" + time + "\"}"
 }
 
 func getUUID(s string) uuid.UUID {

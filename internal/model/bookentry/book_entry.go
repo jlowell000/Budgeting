@@ -6,15 +6,16 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 )
 
 /*
 Struct for defining a BookEntry.
 */
 type BookEntry struct {
-	Id        uuid.UUID `json:"id"`
-	Amount    float64   `json:"amount,omitempty"`
-	Timestamp time.Time `json:"timestamp,omitempty"`
+	Id        uuid.UUID       `json:"id"`
+	Amount    decimal.Decimal `json:"amount,omitempty"`
+	Timestamp time.Time       `json:"timestamp,omitempty"`
 }
 
 // Returns JSON encoding of BookEntry

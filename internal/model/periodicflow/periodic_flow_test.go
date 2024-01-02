@@ -1,22 +1,23 @@
 package periodic_flow
 
 import (
-	"fmt"
 	"log"
 	"testing"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 	"jlowell000.github.io/budgeting/internal/model/period"
 )
 
 const (
-	TEST_ID     = "16cfd708-db6d-42fd-8ad1-55316690520c"
-	TEST_NAME   = "test name"
-	TEST_AMOUNT = 100.99
-	TEST_TIME   = "2006-01-23T15:04:05Z"
+	TEST_ID   = "16cfd708-db6d-42fd-8ad1-55316690520c"
+	TEST_NAME = "test name"
+	TEST_TIME = "2006-01-23T15:04:05Z"
 )
+
+var TEST_AMOUNT = decimal.NewFromFloat(666.66)
 
 func TestPeriodicFlowToJSON(t *testing.T) {
 	id := getUUID(TEST_ID)
@@ -94,7 +95,7 @@ func TestPeriodicFlowFConstructor_properly_sets_weekly_amount(t *testing.T) {
 			Id:               id,
 			Amount:           TEST_AMOUNT,
 			Period:           p,
-			WeeklyAmount:     TEST_AMOUNT * p.WeeklyAmount(),
+			WeeklyAmount:     TEST_AMOUNT.Mul(p.WeeklyAmount()),
 			UpdatedTimestamp: timestamp,
 		}
 		actual := *New(id, TEST_AMOUNT, p, timestamp)
@@ -107,10 +108,10 @@ func TestPeriodicFlow_Sum_different_periods(t *testing.T) {
 	id := getUUID(TEST_ID)
 	timestamp := getTime(TEST_TIME)
 
-	var expected float64
+	var expected decimal.Decimal
 	var flows []PeriodicFlow
 	for _, p := range period.Periods {
-		expected += TEST_AMOUNT * p.WeeklyAmount()
+		expected = expected.Add(TEST_AMOUNT.Mul(p.WeeklyAmount()))
 		flows = append(flows, *New(id, TEST_AMOUNT, p, timestamp))
 	}
 	actual := Sum(flows)
@@ -120,16 +121,16 @@ func TestPeriodicFlow_Sum_different_periods(t *testing.T) {
 func TestPeriodicFlow_Projected_change_different_periods(t *testing.T) {
 	id := getUUID(TEST_ID)
 	timestamp := getTime(TEST_TIME)
-	projectAmount := 30.0
+	projectAmount := decimal.NewFromFloat(30.0)
 	projectPeriod := period.Monthly
 
-	var expected float64
+	var expected decimal.Decimal
 	var flows []PeriodicFlow
 	for _, p := range period.Periods {
-		expected += TEST_AMOUNT * p.WeeklyAmount()
+		expected = expected.Add(TEST_AMOUNT.Mul(p.WeeklyAmount()))
 		flows = append(flows, *New(id, TEST_AMOUNT, p, timestamp))
 	}
-	expected = expected * projectAmount * projectPeriod.WeeklyAmount()
+	expected = expected.Mul(projectAmount).Mul(projectPeriod.WeeklyAmount())
 	actual := ProjectedChange(flows, projectAmount, projectPeriod)
 	assert.Equal(t, expected, actual)
 }
@@ -149,17 +150,17 @@ func getPFParsedValues() (uuid.UUID, time.Time) {
 func getTestJson(
 	id string,
 	name string,
-	amount float64,
+	amount decimal.Decimal,
 	p period.Period,
-	weeklyAmount float64,
+	weeklyAmount decimal.Decimal,
 	time string,
 ) string {
-	return "{\"id\":\"" + id +
-		"\",\"name\":\"" + name +
-		"\",\"amount\":" + fmt.Sprintf("%.2f", amount) +
-		",\"period\":\"" + p.String() +
-		"\",\"weekly_amount\":" + fmt.Sprintf("%.2f", weeklyAmount) +
-		",\"updated_timestamp\":\"" + time + "\"}"
+	return "{\"id\":\"" + id + "\"," +
+		"\"name\":\"" + name + "\"," +
+		"\"amount\":\"" + amount.String() + "\"," +
+		"\"period\":\"" + p.String() + "\"," +
+		"\"weekly_amount\":\"" + weeklyAmount.String() + "\"," +
+		"\"updated_timestamp\":\"" + time + "\"}"
 }
 
 func getUUID(s string) uuid.UUID {

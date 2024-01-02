@@ -5,6 +5,7 @@ import (
 	"log"
 	"testing"
 
+	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -46,19 +47,19 @@ func TestPeriodicFlowToJSON(t *testing.T) {
 	}
 }
 
-func periodWeekContract(p Period) float64 {
+func periodWeekContract(p Period) decimal.Decimal {
 	switch p {
 	default:
-		return 0.0
+		return decimal.NewFromInt(0)
 	case Unknown:
-		return 0.0
+		return decimal.NewFromInt(0)
 	case Daily:
-		return 1 / 7
+		return decimal.NewFromFloat(1 / 7)
 	case Weekly:
-		return 1
+		return decimal.NewFromInt(1)
 	case Monthly:
-		return 52 / 12
+		return decimal.NewFromFloat(52 / 12)
 	case Yearly:
-		return 52
+		return decimal.NewFromInt(52)
 	}
 }

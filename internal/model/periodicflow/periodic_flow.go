@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	"jlowell000.github.io/budgeting/internal/model/period"
 )
 
@@ -14,12 +15,12 @@ Struct for defining a periodic flow.
 A change in amount over a period.
 */
 type PeriodicFlow struct {
-	Id               uuid.UUID     `json:"id"`
-	Name             string        `json:"name,omitempty"`
-	Amount           float64       `json:"amount,omitempty"`
-	Period           period.Period `json:"period"`
-	WeeklyAmount     float64       `json:"weekly_amount,omitempty"`
-	UpdatedTimestamp time.Time     `json:"updated_timestamp,omitempty"`
+	Id               uuid.UUID       `json:"id"`
+	Name             string          `json:"name,omitempty"`
+	Amount           decimal.Decimal `json:"amount,omitempty"`
+	Period           period.Period   `json:"period"`
+	WeeklyAmount     decimal.Decimal `json:"weekly_amount,omitempty"`
+	UpdatedTimestamp time.Time       `json:"updated_timestamp,omitempty"`
 }
 
 /*
@@ -27,7 +28,7 @@ Returns PeriodicFlow of PeriodicFlow
 */
 func New(
 	id uuid.UUID,
-	amount float64,
+	amount decimal.Decimal,
 	period period.Period,
 	timestamp time.Time,
 ) *PeriodicFlow {
@@ -35,7 +36,7 @@ func New(
 		Id:               id,
 		Amount:           amount,
 		Period:           period,
-		WeeklyAmount:     amount * period.WeeklyAmount(),
+		WeeklyAmount:     amount.Mul(period.WeeklyAmount()),
 		UpdatedTimestamp: timestamp,
 	}
 }
@@ -63,10 +64,10 @@ func FromJSON(data []byte) PeriodicFlow {
 /*
 Sum the given Periodic Flows' weekly amounts
 */
-func Sum(flows []PeriodicFlow) float64 {
-	sum := 0.0
+func Sum(flows []PeriodicFlow) decimal.Decimal {
+	sum := decimal.NewFromInt(0)
 	for _, f := range flows {
-		sum += f.WeeklyAmount
+		sum = sum.Add(f.WeeklyAmount)
 	}
 	return sum
 }
@@ -74,8 +75,12 @@ func Sum(flows []PeriodicFlow) float64 {
 /*
 Calculate projected change over time
 */
-func ProjectedChange(flows []PeriodicFlow, amount float64, period period.Period) float64 {
-	return Sum(flows) * period.WeeklyAmount() * amount
+func ProjectedChange(
+	flows []PeriodicFlow,
+	amount decimal.Decimal,
+	period period.Period,
+) decimal.Decimal {
+	return Sum(flows).Mul(period.WeeklyAmount()).Mul(amount)
 }
 
 func (p *PeriodicFlow) String() string {

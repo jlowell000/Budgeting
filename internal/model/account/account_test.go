@@ -7,17 +7,19 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 	"jlowell000.github.io/budgeting/internal/model/bookentry"
 )
 
 const (
-	TEST_ID     = "16cfd708-db6d-42fd-8ad1-55316690520c"
-	TEST_NAME   = "test name"
-	TEST_FLAG   = false
-	TEST_AMOUNT = 100.99
-	TEST_TIME   = "2006-01-23T15:04:05Z"
+	TEST_ID   = "16cfd708-db6d-42fd-8ad1-55316690520c"
+	TEST_NAME = "test name"
+	TEST_FLAG = false
+	TEST_TIME = "2006-01-23T15:04:05Z"
 )
+
+var TEST_AMOUNT = decimal.NewFromFloat(100.99)
 
 func TestAccountToJSON(t *testing.T) {
 	id := getUUID(TEST_ID)
@@ -100,7 +102,7 @@ func Test_GetLatestBookEntry(t *testing.T) {
 	timestamp := getTime(TEST_TIME)
 	expected := bookentry.BookEntry{
 		Id:        uuid.New(),
-		Amount:    666.6,
+		Amount:    decimal.NewFromFloat(666.6),
 		Timestamp: time.Now(),
 	}
 	account := Account{
@@ -135,6 +137,35 @@ func Test_GetLatestBookEntry(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
+func Test_Sum_accounts(t *testing.T) {
+	amount := decimal.NewFromFloat(666.66)
+	testSize := 100
+	testSizeSlice := make([]int, testSize)
+	var accounts []Account
+	for i := range testSizeSlice {
+		testSizeSlice[i] = i
+		accounts = append(accounts, createAccount(amount))
+	}
+	expected := amount.Mul(decimal.NewFromInt(int64(testSize)))
+	actual := Sum(accounts)
+
+	assert.Equal(t, expected, actual)
+}
+
+func createAccount(amount decimal.Decimal) Account {
+	return Account{
+		Id: uuid.New(),
+		Book: []bookentry.BookEntry{
+			{
+				Id:        uuid.New(),
+				Amount:    amount,
+				Timestamp: time.Now(),
+			},
+		},
+		UpdatedTimestamp: time.Now(),
+	}
+}
+
 func getPFParsedValues() (uuid.UUID, time.Time) {
 	id, err1 := uuid.Parse(TEST_ID)
 	if err1 != nil {
@@ -151,7 +182,7 @@ func getTestJson(
 	id string,
 	name string,
 	excludable bool,
-	amount float64,
+	amount decimal.Decimal,
 	time string,
 ) string {
 	return "{\"id\":\"" + id + "\"," +
@@ -159,8 +190,8 @@ func getTestJson(
 		"\"excludable\":" + fmt.Sprintf("%t", excludable) + "," +
 		"\"book\":[" +
 		"{\"id\":\"" + id +
-		"\",\"amount\":" + fmt.Sprintf("%.2f", amount) +
-		",\"timestamp\":\"" + time + "\"}" +
+		"\",\"amount\":\"" + amount.String() + "\"," +
+		"\"timestamp\":\"" + time + "\"}" +
 		"]," +
 		"\"updated_timestamp\":\"" + time + "\"}"
 }
