@@ -1,7 +1,6 @@
 package periodic_flow
 
 import (
-	// "fmt"
 	"encoding/json"
 	"log"
 	"time"
@@ -10,6 +9,10 @@ import (
 	"jlowell000.github.io/budgeting/internal/model/period"
 )
 
+/*
+Struct for defining a periodic flow.
+A change in amount over a period.
+*/
 type PeriodicFlow struct {
 	Id               uuid.UUID     `json:"id"`
 	Name             string        `json:"name,omitempty"`
