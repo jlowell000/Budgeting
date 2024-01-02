@@ -10,12 +10,12 @@ import (
 )
 
 type PeriodicFlow struct {
-	Id                   uuid.UUID
-	Name                 string
-	Amount               float64
-	Period               Period
-	WeeklyAmount         float64
-	LastUpdatedTimestamp time.Time
+	Id               uuid.UUID `json:"id"`
+	Name             string    `json:"name,omitempty"`
+	Amount           float64   `json:"amount,omitempty"`
+	Period           Period    `json:"period"`
+	WeeklyAmount     float64   `json:"weekly_amount,omitempty"`
+	UpdatedTimestamp time.Time `json:"updated_timestamp,omitempty"`
 }
 
 // Returns JSON encoding of PeriodicFlow
