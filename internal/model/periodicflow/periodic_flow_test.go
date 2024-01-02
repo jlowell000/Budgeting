@@ -85,6 +85,55 @@ func TestPeriodicFlowFromJSON_no_data(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
+func TestPeriodicFlowFConstructor_properly_sets_weekly_amount(t *testing.T) {
+	id := getUUID(TEST_ID)
+	timestamp := getTime(TEST_TIME)
+
+	for _, p := range period.Periods {
+		expected := PeriodicFlow{
+			Id:               id,
+			Amount:           TEST_AMOUNT,
+			Period:           p,
+			WeeklyAmount:     TEST_AMOUNT * p.WeeklyAmount(),
+			UpdatedTimestamp: timestamp,
+		}
+		actual := *New(id, TEST_AMOUNT, p, timestamp)
+
+		assert.Equal(t, expected, actual)
+	}
+}
+
+func TestPeriodicFlow_Sum_different_periods(t *testing.T) {
+	id := getUUID(TEST_ID)
+	timestamp := getTime(TEST_TIME)
+
+	var expected float64
+	var flows []PeriodicFlow
+	for _, p := range period.Periods {
+		expected += TEST_AMOUNT * p.WeeklyAmount()
+		flows = append(flows, *New(id, TEST_AMOUNT, p, timestamp))
+	}
+	actual := Sum(flows)
+	assert.Equal(t, expected, actual)
+}
+
+func TestPeriodicFlow_Projected_change_different_periods(t *testing.T) {
+	id := getUUID(TEST_ID)
+	timestamp := getTime(TEST_TIME)
+	projectAmount := 30.0
+	projectPeriod := period.Monthly
+
+	var expected float64
+	var flows []PeriodicFlow
+	for _, p := range period.Periods {
+		expected += TEST_AMOUNT * p.WeeklyAmount()
+		flows = append(flows, *New(id, TEST_AMOUNT, p, timestamp))
+	}
+	expected = expected * projectAmount * projectPeriod.WeeklyAmount()
+	actual := ProjectedChange(flows, projectAmount, projectPeriod)
+	assert.Equal(t, expected, actual)
+}
+
 func getPFParsedValues() (uuid.UUID, time.Time) {
 	id, err1 := uuid.Parse(TEST_ID)
 	if err1 != nil {
