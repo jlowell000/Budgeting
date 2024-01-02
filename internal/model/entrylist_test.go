@@ -11,7 +11,7 @@ const (
 )
 
 func TestEntryListToJSON(t *testing.T) {
-	id, timestamp := getParsedValues()
+	id, timestamp := GetParsedValues()
 
 	expected := TEST_LIST_JSON
 	entry := EntryList{
@@ -35,7 +35,7 @@ func TestEntryListToJSON(t *testing.T) {
 }
 
 func TestEntryListFromJSON_data_exists(t *testing.T) {
-	id, timestamp := getParsedValues()
+	id, timestamp := GetParsedValues()
 
 	expected := EntryList{
 		Entries: []Entry{
@@ -64,7 +64,7 @@ func TestEntryListFromJSON_no_data(t *testing.T) {
 }
 
 func TestAdd(t *testing.T) {
-	id, timestamp := getParsedValues()
+	id, timestamp := GetParsedValues()
 	expected := EntryList{
 		Entries: []Entry{
 			{
