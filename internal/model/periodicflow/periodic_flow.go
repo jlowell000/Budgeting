@@ -37,3 +37,11 @@ func FromJSON(data []byte) PeriodicFlow {
 	json.Unmarshal(data, &flow)
 	return flow
 }
+
+func Sum(flows []PeriodicFlow) float64 {
+	sum := 0.0
+	for _, f := range flows {
+		sum += f.Amount
+	}
+	return sum
+}
