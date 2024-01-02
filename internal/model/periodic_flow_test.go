@@ -22,15 +22,15 @@ const (
 var TEST_PF_JSON = "{\"Id\":\"" + TEST_PF_ID +
 	"\",\"Name\":\"" + TEST_PF_NAME +
 	"\",\"Amount\":" + fmt.Sprintf("%.2f", TEST_PF_AMOUNT) +
-	",\"Period\":" + fmt.Sprintf("%d", TEST_PF_PERIOD) +
-	",\"WeeklyAmount\":" + fmt.Sprintf("%.2f", TEST_PF_AMOUNT) +
+	",\"Period\":\"" + TEST_PF_PERIOD.String() +
+	"\",\"WeeklyAmount\":" + fmt.Sprintf("%.2f", TEST_PF_AMOUNT) +
 	",\"LastUpdatedTimestamp\":\"" + TEST_PF_TIME + "\"}"
 
 func TestPeriodicFlowToJSON(t *testing.T) {
 	id, timestamp := getParsedValues()
 
 	expected := TEST_PF_JSON
-	PeriodicFlow := PeriodicFlow{
+	periodicFlow := PeriodicFlow{
 		Id:                   id,
 		Name:                 TEST_PF_NAME,
 		Amount:               TEST_PF_AMOUNT,
@@ -38,7 +38,7 @@ func TestPeriodicFlowToJSON(t *testing.T) {
 		WeeklyAmount:         TEST_PF_AMOUNT,
 		LastUpdatedTimestamp: timestamp,
 	}
-	actual := string(PeriodicFlow.ToJSON())
+	actual := string(periodicFlow.ToJSON())
 
 	assert.Equal(t, expected, actual)
 }
