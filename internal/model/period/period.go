@@ -2,6 +2,8 @@ package period
 
 import (
 	"strings"
+
+	"github.com/shopspring/decimal"
 )
 
 /*
@@ -65,19 +67,19 @@ func PeriodFromText(text string) Period {
 /*
 Get the Period for a given string.
 */
-func (p *Period) WeeklyAmount() float64 {
+func (p *Period) WeeklyAmount() decimal.Decimal {
 	switch *p {
 	default:
-		return 0.0
+		return decimal.NewFromInt(0)
 	case Unknown:
-		return 0.0
+		return decimal.NewFromInt(0)
 	case Daily:
-		return 1 / 7
+		return decimal.NewFromFloat(1 / 7)
 	case Weekly:
-		return 1
+		return decimal.NewFromInt(1)
 	case Monthly:
-		return 52 / 12
+		return decimal.NewFromFloat(52 / 12)
 	case Yearly:
-		return 52
+		return decimal.NewFromInt(52)
 	}
 }

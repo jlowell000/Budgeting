@@ -7,25 +7,29 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 	"jlowell000.github.io/budgeting/internal/model/bookentry"
 )
 
 const (
-	TEST_ID     = "16cfd708-db6d-42fd-8ad1-55316690520c"
-	TEST_NAME   = "test name"
-	TEST_AMOUNT = 100.99
-	TEST_TIME   = "2006-01-23T15:04:05Z"
+	TEST_ID   = "16cfd708-db6d-42fd-8ad1-55316690520c"
+	TEST_NAME = "test name"
+	TEST_FLAG = false
+	TEST_TIME = "2006-01-23T15:04:05Z"
 )
+
+var TEST_AMOUNT = decimal.NewFromFloat(100.99)
 
 func TestAccountToJSON(t *testing.T) {
 	id := getUUID(TEST_ID)
 	timestamp := getTime(TEST_TIME)
 
-	expected := getTestJson(TEST_ID, TEST_NAME, TEST_AMOUNT, TEST_TIME)
+	expected := getTestJson(TEST_ID, TEST_NAME, TEST_FLAG, TEST_AMOUNT, TEST_TIME)
 	periodicFlow := Account{
-		Id:   id,
-		Name: TEST_NAME,
+		Id:         id,
+		Name:       TEST_NAME,
+		Excludable: TEST_FLAG,
 		Book: []bookentry.BookEntry{
 			{
 				Id:        id,
@@ -45,8 +49,9 @@ func TestAccountFromJSON_data_there(t *testing.T) {
 	timestamp := getTime(TEST_TIME)
 
 	expected := Account{
-		Id:   id,
-		Name: TEST_NAME,
+		Id:         id,
+		Name:       TEST_NAME,
+		Excludable: TEST_FLAG,
 		Book: []bookentry.BookEntry{
 			{
 				Id:        id,
@@ -57,7 +62,7 @@ func TestAccountFromJSON_data_there(t *testing.T) {
 		UpdatedTimestamp: timestamp,
 	}
 	actual := FromJSON([]byte(
-		getTestJson(TEST_ID, TEST_NAME, TEST_AMOUNT, TEST_TIME),
+		getTestJson(TEST_ID, TEST_NAME, TEST_FLAG, TEST_AMOUNT, TEST_TIME),
 	))
 
 	assert.Equal(t, expected, actual)
@@ -79,7 +84,7 @@ func TestAccountFromJSON_partial_data_there(t *testing.T) {
 		UpdatedTimestamp: timestamp,
 	}
 	actual := FromJSON([]byte(
-		getTestJson(TEST_ID, "", TEST_AMOUNT, TEST_TIME),
+		getTestJson(TEST_ID, "", TEST_FLAG, TEST_AMOUNT, TEST_TIME),
 	))
 
 	assert.Equal(t, expected, actual)
@@ -90,6 +95,92 @@ func TestAccountFromJSON_no_data(t *testing.T) {
 	actual := FromJSON([]byte(""))
 
 	assert.Equal(t, expected, actual)
+}
+
+func Test_GetLatestBookEntry(t *testing.T) {
+	id := getUUID(TEST_ID)
+	timestamp := getTime(TEST_TIME)
+	expected := bookentry.BookEntry{
+		Id:        uuid.New(),
+		Amount:    decimal.NewFromFloat(666.6),
+		Timestamp: time.Now(),
+	}
+	account := Account{
+		Id: id,
+		Book: []bookentry.BookEntry{
+			{
+				Id:        uuid.New(),
+				Amount:    TEST_AMOUNT,
+				Timestamp: timestamp,
+			},
+			{
+				Id:        uuid.New(),
+				Amount:    TEST_AMOUNT,
+				Timestamp: timestamp,
+			},
+			expected,
+			{
+				Id:        uuid.New(),
+				Amount:    TEST_AMOUNT,
+				Timestamp: timestamp,
+			},
+			{
+				Id:        uuid.New(),
+				Amount:    TEST_AMOUNT,
+				Timestamp: timestamp,
+			},
+		},
+		UpdatedTimestamp: timestamp,
+	}
+	actual := account.GetLatestBookEntry()
+
+	assert.Equal(t, expected, actual)
+}
+
+func Test_Sum_accounts(t *testing.T) {
+	amount := decimal.NewFromFloat(666.66)
+	testSize := 100
+	testSizeSlice := make([]int, testSize)
+	var accounts []Account
+	for i := range testSizeSlice {
+		testSizeSlice[i] = i
+		accounts = append(accounts, createAccount(amount, false))
+	}
+	expected := amount.Mul(decimal.NewFromInt(int64(testSize)))
+	actual := Sum(accounts)
+
+	assert.Equal(t, expected, actual)
+}
+
+func Test_SumExclusion_accounts(t *testing.T) {
+	amount := decimal.NewFromFloat(666.66)
+	testSize := 100
+	testSizeSlice := make([]int, testSize)
+	var accounts []Account
+	for i := range testSizeSlice {
+		testSizeSlice[i] = i
+		third := i%4 == 0
+		accounts = append(accounts, createAccount(amount, !third))
+	}
+	expected := amount.Mul(decimal.NewFromFloat(float64(testSize) / 4))
+	actual := SumExclusion(accounts)
+
+	assert.Equal(t, expected, actual)
+}
+
+func createAccount(amount decimal.Decimal, excludable bool) Account {
+	return Account{
+		Id:         uuid.New(),
+		Excludable: excludable,
+		Book: []bookentry.BookEntry{
+			{
+				Id:        uuid.New(),
+				Amount:    amount,
+				Timestamp: time.Now(),
+			},
+		},
+		UpdatedTimestamp: time.Now(),
+	}
 }
 
 func getPFParsedValues() (uuid.UUID, time.Time) {
@@ -107,15 +198,17 @@ func getPFParsedValues() (uuid.UUID, time.Time) {
 func getTestJson(
 	id string,
 	name string,
-	amount float64,
+	excludable bool,
+	amount decimal.Decimal,
 	time string,
 ) string {
 	return "{\"id\":\"" + id + "\"," +
 		"\"name\":\"" + name + "\"," +
+		"\"excludable\":" + fmt.Sprintf("%t", excludable) + "," +
 		"\"book\":[" +
 		"{\"id\":\"" + id +
-		"\",\"amount\":" + fmt.Sprintf("%.2f", amount) +
-		",\"timestamp\":\"" + time + "\"}" +
+		"\",\"amount\":\"" + amount.String() + "\"," +
+		"\"timestamp\":\"" + time + "\"}" +
 		"]," +
 		"\"updated_timestamp\":\"" + time + "\"}"
 }
