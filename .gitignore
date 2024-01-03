@@ -20,5 +20,6 @@
 # Go workspace file
 go.work
 cmd/cli/Budgeting
+Budgeting
 cmd/cli/entrylist.json
 stringer

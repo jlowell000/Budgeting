@@ -1,55 +1,88 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"os"
+	"time"
 
-	"jlowell000.github.io/budgeting/internal/service"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
+	"jlowell000.github.io/budgeting/internal/model/account"
+	"jlowell000.github.io/budgeting/internal/model/bookentry"
+	"jlowell000.github.io/budgeting/internal/model/period"
+	periodic_flow "jlowell000.github.io/budgeting/internal/model/periodicflow"
+	"jlowell000.github.io/budgeting/internal/views"
 )
 
 const (
 	CMD_CREATE         = "create"
 	CMD_READ           = "read"
+	CMD_QUIT           = "quit"
 	FLG_ALL            = "all"
 	VAR_CONTENT        = "content"
-	ENTRYLIST_FILENAME = "./entrylist.json"
+	ENTRYLIST_FILENAME = "./data.json"
 )
 
 func main() {
-
-	if len(os.Args) < 2 {
-		fmt.Println("expected '" + CMD_CREATE + ", or " + CMD_READ + "' subcommands")
-		os.Exit(1)
-	}
-
-	switch os.Args[1] {
-	case CMD_CREATE:
-		create()
-	case CMD_READ:
-		read()
-	default:
-		fmt.Println("expected '" + CMD_CREATE + ", or " + CMD_READ + "' subcommands")
+	p := tea.NewProgram(initialModel())
+	if _, err := p.Run(); err != nil {
+		fmt.Printf("Alas, there's been an error: %v", err)
 		os.Exit(1)
 	}
 }
 
-func create() {
-	cmd := flag.NewFlagSet(CMD_CREATE, flag.ExitOnError)
-	content := cmd.String(VAR_CONTENT, "", VAR_CONTENT)
-	cmd.Parse(os.Args[2:])
-	entry := service.CreateEntry(*content, ENTRYLIST_FILENAME)
-	fmt.Println("Added entry:", entry)
+func initialModel() views.AppModel {
+	return views.AppModel{
+		Main: views.MainModel{
+			Choice:   1,
+			Selected: make(map[int]struct{}),
+		},
+		FlowList: views.FlowListModel{
+			Flows:    createTestFlows(),
+			Selected: make(map[int]struct{}),
+		},
+		AccountList: views.AccountListModel{
+			Accounts: createTestAccounts(),
+			Selected: make(map[int]struct{}),
+		},
+	}
 }
 
-func read() {
-	cmd := flag.NewFlagSet(CMD_READ, flag.ExitOnError)
-	all := cmd.Bool(FLG_ALL, false, FLG_ALL)
-	cmd.Parse(os.Args[2:])
+//TODO: below is test data to be removed in later issues
 
-	if *all {
-		fmt.Println(service.GetEntryList(ENTRYLIST_FILENAME))
-	} else {
-		fmt.Println(service.GetLatestEntry(ENTRYLIST_FILENAME))
+func createTestFlows() []periodic_flow.PeriodicFlow {
+	return []periodic_flow.PeriodicFlow{
+		*periodic_flow.New(uuid.New(), decimal.NewFromFloat(666.66), period.Weekly, time.Now()),
+		*periodic_flow.New(uuid.New(), decimal.NewFromFloat(123.66), period.Weekly, time.Now()),
+		*periodic_flow.New(uuid.New(), decimal.NewFromFloat(542.66), period.Weekly, time.Now()),
+		*periodic_flow.New(uuid.New(), decimal.NewFromFloat(1366.66), period.Weekly, time.Now()),
+	}
+}
+
+func createTestAccounts() []account.Account {
+	amount := decimal.NewFromFloat(666.66)
+	testSize := 10
+	testSizeSlice := make([]int, testSize)
+	var accounts []account.Account
+	for i := range testSizeSlice {
+		testSizeSlice[i] = i
+		accounts = append(accounts, createAccount(amount, false))
+	}
+	return accounts
+}
+
+func createAccount(amount decimal.Decimal, excludable bool) account.Account {
+	return account.Account{
+		Id:         uuid.New(),
+		Excludable: excludable,
+		Book: []bookentry.BookEntry{
+			{
+				Id:        uuid.New(),
+				Amount:    amount,
+				Timestamp: time.Now(),
+			},
+		},
+		UpdatedTimestamp: time.Now(),
 	}
 }
