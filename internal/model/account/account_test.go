@@ -98,43 +98,187 @@ func TestAccountFromJSON_no_data(t *testing.T) {
 }
 
 func Test_GetLatestBookEntry(t *testing.T) {
-	id := getUUID(TEST_ID)
-	timestamp := getTime(TEST_TIME)
 	expected := bookentry.BookEntry{
 		Id:        uuid.New(),
 		Amount:    decimal.NewFromFloat(666.6),
 		Timestamp: time.Now(),
 	}
 	account := Account{
-		Id: id,
+		Id: uuid.New(),
 		Book: []bookentry.BookEntry{
 			{
 				Id:        uuid.New(),
 				Amount:    TEST_AMOUNT,
-				Timestamp: timestamp,
+				Timestamp: time.UnixMilli(1),
 			},
 			{
 				Id:        uuid.New(),
 				Amount:    TEST_AMOUNT,
-				Timestamp: timestamp,
+				Timestamp: time.UnixMilli(1),
 			},
 			expected,
 			{
 				Id:        uuid.New(),
 				Amount:    TEST_AMOUNT,
-				Timestamp: timestamp,
+				Timestamp: time.UnixMilli(1),
 			},
 			{
 				Id:        uuid.New(),
 				Amount:    TEST_AMOUNT,
-				Timestamp: timestamp,
+				Timestamp: time.UnixMilli(1),
 			},
 		},
-		UpdatedTimestamp: timestamp,
+		UpdatedTimestamp: time.Now(),
 	}
 	actual := account.GetLatestBookEntry()
 
 	assert.Equal(t, expected, actual)
+}
+
+func Test_GetEarliestBookEntry(t *testing.T) {
+	expected := bookentry.BookEntry{
+		Id:        uuid.New(),
+		Timestamp: time.UnixMilli(100000),
+	}
+	account := Account{
+		Id: uuid.New(),
+		Book: []bookentry.BookEntry{
+			{
+				Id:        uuid.New(),
+				Timestamp: time.UnixMilli(500000),
+			},
+			{
+				Id:        uuid.New(),
+				Timestamp: time.UnixMilli(500000),
+			},
+			expected,
+			{
+				Id:        uuid.New(),
+				Timestamp: time.UnixMilli(500000),
+			},
+			{
+				Id:        uuid.New(),
+				Timestamp: time.UnixMilli(500000),
+			},
+		},
+		UpdatedTimestamp: time.Now(),
+	}
+	actual := account.GetEarliestBookEntry()
+
+	assert.Equal(t, expected, actual)
+}
+
+func Test_GetBookEndEntries(t *testing.T) {
+	expected1 := bookentry.BookEntry{
+		Id:        uuid.New(),
+		Timestamp: time.UnixMilli(100000),
+	}
+
+	expected2 := bookentry.BookEntry{
+		Id:        uuid.New(),
+		Timestamp: time.UnixMilli(700000),
+	}
+	account := Account{
+		Id: uuid.New(),
+		Book: []bookentry.BookEntry{
+			{
+				Id:        uuid.New(),
+				Timestamp: time.UnixMilli(500000),
+			},
+			{
+				Id:        uuid.New(),
+				Timestamp: time.UnixMilli(500000),
+			},
+			expected2,
+			{
+				Id:        uuid.New(),
+				Timestamp: time.UnixMilli(500000),
+			},
+			expected1,
+			{
+				Id:        uuid.New(),
+				Timestamp: time.UnixMilli(500000),
+			},
+		},
+		UpdatedTimestamp: time.Now(),
+	}
+	actual1, actual2 := account.GetBookEndEntries()
+
+	assert.Equal(t, expected1, actual1)
+	assert.Equal(t, expected2, actual2)
+
+}
+
+func TestRateOfChange(t *testing.T) {
+	testSize := 100
+	testSizeSlice := make([]bool, testSize)
+	a := bookentry.BookEntry{
+		Amount:    decimal.NewFromInt(0),
+		Timestamp: time.UnixMilli(0),
+	}
+
+	for i := range testSizeSlice {
+		for j := range testSizeSlice {
+			di := decimal.NewFromInt(int64(i + 1))
+			dj := int64(j + 1)
+			expected := di.Div(decimal.NewFromInt(dj))
+			account := Account{
+				Id: uuid.New(),
+				Book: []bookentry.BookEntry{
+					a,
+					{
+						Amount:    di,
+						Timestamp: time.UnixMilli(dj),
+					},
+				},
+				UpdatedTimestamp: time.Now(),
+			}
+
+			assert.True(t, expected.Equals(account.RateOfChange()))
+		}
+	}
+
+	for i := range testSizeSlice {
+		for j := range testSizeSlice {
+			di := decimal.NewFromInt(int64(i + 1))
+			dj := int64(testSize - j + 1)
+			expected := di.Div(decimal.NewFromInt(dj))
+			account := Account{
+				Id: uuid.New(),
+				Book: []bookentry.BookEntry{
+					a,
+					{
+						Amount:    di,
+						Timestamp: time.UnixMilli(dj),
+					},
+				},
+				UpdatedTimestamp: time.Now(),
+			}
+
+			assert.True(t, expected.Equals(account.RateOfChange()))
+		}
+	}
+
+	expected := decimal.NewFromInt(0)
+	account := Account{
+		Id:               uuid.New(),
+		Book:             []bookentry.BookEntry{a},
+		UpdatedTimestamp: time.Now(),
+	}
+	assert.True(t, expected.Equals(account.RateOfChange()))
+
+	account = Account{
+		Id:               uuid.New(),
+		Book:             []bookentry.BookEntry{},
+		UpdatedTimestamp: time.Now(),
+	}
+	assert.True(t, expected.Equals(account.RateOfChange()))
+
+	account = Account{
+		Id:               uuid.New(),
+		UpdatedTimestamp: time.Now(),
+	}
+	assert.True(t, expected.Equals(account.RateOfChange()))
 }
 
 func Test_Sum_accounts(t *testing.T) {

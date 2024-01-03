@@ -61,16 +61,58 @@ func SumExclusion(accounts []Account) decimal.Decimal {
 	return sum
 }
 
-// Returns JSON encoding of Account
+// Returns Latest Book entry for Account
 func (account *Account) GetLatestBookEntry() bookentry.BookEntry {
 
 	var bookentry bookentry.BookEntry
 	for _, b := range account.Book {
-		if b.Timestamp.After(bookentry.Timestamp) {
+		if bookentry.Timestamp.Before(b.Timestamp) {
 			bookentry = b
 		}
 	}
 	return bookentry
+}
+
+// Returns Earliest Book entry for Account
+func (account *Account) GetEarliestBookEntry() bookentry.BookEntry {
+	var bookentry bookentry.BookEntry
+	if len(account.Book) > 0 {
+		bookentry = account.Book[0]
+		for _, b := range account.Book {
+			if bookentry.Timestamp.After(b.Timestamp) {
+				bookentry = b
+			}
+		}
+	}
+	return bookentry
+}
+
+func (account *Account) GetBookEndEntries() (bookentry.BookEntry, bookentry.BookEntry) {
+	var first bookentry.BookEntry
+	var second bookentry.BookEntry
+
+	if len(account.Book) > 0 {
+		first = account.Book[0]
+		second = account.Book[0]
+		for _, b := range account.Book {
+			if first.Timestamp.After(b.Timestamp) {
+				first = b
+			}
+			if second.Timestamp.Before(b.Timestamp) {
+				second = b
+			}
+		}
+	}
+	return first, second
+}
+
+func (account *Account) RateOfChange() decimal.Decimal {
+	if len(account.Book) < 2 {
+		return decimal.NewFromInt(0)
+	} else {
+		a, b := account.GetBookEndEntries()
+		return bookentry.RateOfChange(a, b)
+	}
 }
 
 func (a *Account) String() string {
