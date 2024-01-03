@@ -11,8 +11,12 @@ import (
 	"jlowell000.github.io/budgeting/internal/model/account"
 	"jlowell000.github.io/budgeting/internal/model/bookentry"
 	"jlowell000.github.io/budgeting/internal/model/period"
-	periodic_flow "jlowell000.github.io/budgeting/internal/model/periodicflow"
+	"jlowell000.github.io/budgeting/internal/model/periodicflow"
+
 	"jlowell000.github.io/budgeting/internal/views"
+	"jlowell000.github.io/budgeting/internal/views/accountlist"
+	"jlowell000.github.io/budgeting/internal/views/flowlist"
+	mainview "jlowell000.github.io/budgeting/internal/views/main"
 )
 
 const (
@@ -34,15 +38,15 @@ func main() {
 
 func initialModel() views.AppModel {
 	return views.AppModel{
-		Main: views.MainModel{
+		Main: mainview.MainModel{
 			Choice:   1,
 			Selected: make(map[int]struct{}),
 		},
-		FlowList: views.FlowListModel{
+		FlowList: flowlist.FlowListModel{
 			Flows:    createTestFlows(),
 			Selected: make(map[int]struct{}),
 		},
-		AccountList: views.AccountListModel{
+		AccountList: accountlist.AccountListModel{
 			Accounts: createTestAccounts(),
 			Selected: make(map[int]struct{}),
 		},
@@ -51,12 +55,12 @@ func initialModel() views.AppModel {
 
 //TODO: below is test data to be removed in later issues
 
-func createTestFlows() []periodic_flow.PeriodicFlow {
-	return []periodic_flow.PeriodicFlow{
-		*periodic_flow.New(uuid.New(), decimal.NewFromFloat(666.66), period.Weekly, time.Now()),
-		*periodic_flow.New(uuid.New(), decimal.NewFromFloat(123.66), period.Weekly, time.Now()),
-		*periodic_flow.New(uuid.New(), decimal.NewFromFloat(542.66), period.Weekly, time.Now()),
-		*periodic_flow.New(uuid.New(), decimal.NewFromFloat(1366.66), period.Weekly, time.Now()),
+func createTestFlows() []periodicflow.PeriodicFlow {
+	return []periodicflow.PeriodicFlow{
+		*periodicflow.New(uuid.New(), decimal.NewFromFloat(666.66), period.Weekly, time.Now()),
+		*periodicflow.New(uuid.New(), decimal.NewFromFloat(123.66), period.Weekly, time.Now()),
+		*periodicflow.New(uuid.New(), decimal.NewFromFloat(542.66), period.Weekly, time.Now()),
+		*periodicflow.New(uuid.New(), decimal.NewFromFloat(1366.66), period.Weekly, time.Now()),
 	}
 }
 

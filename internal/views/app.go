@@ -1,26 +1,20 @@
 package views
 
 import (
-	"fmt"
-
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/muesli/reflow/indent"
-	"github.com/muesli/termenv"
+
+	"jlowell000.github.io/budgeting/internal/views/accountlist"
+	"jlowell000.github.io/budgeting/internal/views/flowlist"
+	"jlowell000.github.io/budgeting/internal/views/main"
 )
 
 type AppModel struct {
-	Main        MainModel
-	FlowList    FlowListModel
-	AccountList AccountListModel
+	Main        main.MainModel
+	FlowList    flowlist.FlowListModel
+	AccountList accountlist.AccountListModel
 	Quitting    bool
 }
-
-var (
-	Term    = termenv.EnvColorProfile()
-	Keyword = makeFgStyle("211")
-	Subtle  = makeFgStyle("241")
-	Dot     = ColorFg(" • ", "236")
-)
 
 func (m AppModel) Init() tea.Cmd {
 	// Just return `nil`, which means "no I/O right now, please."
@@ -41,12 +35,12 @@ func (m AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// appropriate view based on the current state.
 	if m.Main.Chosen == true {
 		if m.Main.Choice == 1 {
-			return flowListUpdate(msg, m)
+			return flowlist.FlowListUpdate(msg, &m)
 		} else if m.Main.Choice == 2 {
-			return accountListUpdate(msg, m)
+			return accountlist.AccountListUpdate(msg, &m)
 		}
 	}
-	return mainUpdate(msg, m)
+	return main.MainUpdate(msg, &m)
 }
 
 func (m AppModel) View() string {
@@ -56,27 +50,24 @@ func (m AppModel) View() string {
 	}
 	if m.Main.Chosen == true {
 		if m.Main.Choice == 1 {
-			s = flowListView(m)
+			s = flowlist.FlowListView(&m)
 		} else if m.Main.Choice == 2 {
-			s = accountListView(m)
+			s = accountlist.AccountListView(&m)
 		}
 	} else {
-		s = mainView(m)
+		s = main.MainView(&m)
 	}
 	return indent.String("\n"+s+"\n\n", 2)
 }
 
-func Checkbox(label string, checked bool) string {
-	if checked {
-		return ColorFg("[x] "+label, "212")
-	}
-	return fmt.Sprintf("[ ] %s", label)
+func (m *AppModel) GetMain() *main.MainModel {
+	return &m.Main
 }
 
-func ColorFg(val, color string) string {
-	return termenv.String(val).Foreground(Term.Color(color)).String()
+func (m *AppModel) GetFlowList() *flowlist.FlowListModel {
+	return &m.FlowList
 }
 
-func makeFgStyle(color string) func(string) string {
-	return termenv.Style{}.Foreground(Term.Color(color)).Styled
+func (m *AppModel) GetAccountList() *accountlist.AccountListModel {
+	return &m.AccountList
 }
