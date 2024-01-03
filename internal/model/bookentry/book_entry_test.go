@@ -70,6 +70,49 @@ func TestAccountFromJSON_no_data(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
+func TestRateOfChange(t *testing.T) {
+	testSize := 100
+	testSizeSlice := make([]bool, testSize)
+	a := BookEntry{
+		Amount:    decimal.NewFromInt(0),
+		Timestamp: time.UnixMilli(0),
+	}
+
+	for i := range testSizeSlice {
+		for j := range testSizeSlice {
+			di := decimal.NewFromInt(int64(i + 1))
+			dj := int64(j + 1)
+			expected := di.Div(decimal.NewFromInt(dj))
+			actual := RateOfChange(
+				a,
+				BookEntry{
+					Amount:    di,
+					Timestamp: time.UnixMilli(dj),
+				},
+			)
+
+			assert.True(t, expected.Equals(actual))
+		}
+	}
+
+	for i := range testSizeSlice {
+		for j := range testSizeSlice {
+			di := decimal.NewFromInt(int64(i + 1))
+			dj := int64(testSize - j + 1)
+			expected := di.Div(decimal.NewFromInt(dj))
+			actual := RateOfChange(
+				a,
+				BookEntry{
+					Amount:    di,
+					Timestamp: time.UnixMilli(dj),
+				},
+			)
+
+			assert.True(t, expected.Equals(actual))
+		}
+	}
+}
+
 func getPFParsedValues() (uuid.UUID, time.Time) {
 	id, err1 := uuid.Parse(TEST_ID)
 	if err1 != nil {

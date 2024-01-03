@@ -37,3 +37,13 @@ func FromJSON(data []byte) BookEntry {
 func (b *BookEntry) String() string {
 	return string(b.ToJSON())
 }
+
+/*
+Rate of change between two entries.
+
+Returns in units of `Money / Millisecond`
+*/
+func RateOfChange(a BookEntry, b BookEntry) decimal.Decimal {
+	timeDiff := b.Timestamp.UnixMilli() - a.Timestamp.UnixMilli()
+	return (b.Amount.Sub(a.Amount)).Div(decimal.NewFromInt(timeDiff))
+}
