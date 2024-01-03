@@ -63,30 +63,19 @@ func SumExclusion(accounts []Account) decimal.Decimal {
 
 // Returns Latest Book entry for Account
 func (account *Account) GetLatestBookEntry() bookentry.BookEntry {
-
-	var bookentry bookentry.BookEntry
-	for _, b := range account.Book {
-		if bookentry.Timestamp.Before(b.Timestamp) {
-			bookentry = b
-		}
-	}
-	return bookentry
+	_, b := account.GetBookEndEntries()
+	return b
 }
 
 // Returns Earliest Book entry for Account
 func (account *Account) GetEarliestBookEntry() bookentry.BookEntry {
-	var bookentry bookentry.BookEntry
-	if len(account.Book) > 0 {
-		bookentry = account.Book[0]
-		for _, b := range account.Book {
-			if bookentry.Timestamp.After(b.Timestamp) {
-				bookentry = b
-			}
-		}
-	}
-	return bookentry
+	a, _ := account.GetBookEndEntries()
+	return a
 }
 
+/*
+Get the earliest and latest entries from the account book
+*/
 func (account *Account) GetBookEndEntries() (bookentry.BookEntry, bookentry.BookEntry) {
 	var first bookentry.BookEntry
 	var second bookentry.BookEntry
