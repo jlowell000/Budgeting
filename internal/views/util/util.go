@@ -5,6 +5,7 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/termenv"
+	"github.com/shopspring/decimal"
 )
 
 var (
@@ -25,7 +26,7 @@ var (
 )
 
 func Instructions() string {
-	return Subtle("j/k, up/down: select") + Dot +
+	return Subtle("up/down: select") + Dot +
 		Subtle("enter: choose") + Dot +
 		Subtle("b: previous screen") + Dot +
 		Subtle("q, esc: quit")
@@ -44,4 +45,9 @@ func ColorFg(val, color string) string {
 
 func makeFgStyle(color string) func(string) string {
 	return termenv.Style{}.Foreground(Term.Color(color)).Styled
+}
+
+func IsMoneyNumber(input string) error {
+	_, err := decimal.NewFromString(input)
+	return err
 }

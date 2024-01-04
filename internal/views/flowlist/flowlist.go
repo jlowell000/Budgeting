@@ -48,12 +48,12 @@ func FlowListUpdate(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "j", "down":
+		case "down":
 			flowList.Choice++
 			if flowList.Choice > len(flowList.Flows)-1 {
 				flowList.Choice = len(flowList.Flows) - 1
 			}
-		case "k", "up":
+		case "up":
 			flowList.Choice--
 			if flowList.Choice < 0 {
 				flowList.Choice = 0
@@ -128,7 +128,7 @@ func createFormInputs(
 		case 1:
 			t.Placeholder = "Amount"
 			t.SetValue(a.String())
-			t.Validate = isMoneyNumber
+			t.Validate = util.IsMoneyNumber
 		case 2:
 			t.Placeholder = "Period"
 			t.SetValue(p.String())
@@ -165,11 +165,6 @@ func checkFormForNewData(flowList *FlowListModel, form *form.FormModel) bool {
 		return true
 	}
 	return false
-}
-
-func isMoneyNumber(input string) error {
-	_, err := decimal.NewFromString(input)
-	return err
 }
 
 func isPeriodString(input string) error {

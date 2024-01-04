@@ -15,6 +15,7 @@ import (
 
 	"jlowell000.github.io/budgeting/internal/views"
 	"jlowell000.github.io/budgeting/internal/views/accountlist"
+	"jlowell000.github.io/budgeting/internal/views/accountview"
 	"jlowell000.github.io/budgeting/internal/views/flowlist"
 	"jlowell000.github.io/budgeting/internal/views/mainview"
 )
@@ -63,6 +64,9 @@ func initialModel() views.AppModel {
 			Accounts:           accounts,
 			Selected:           make(map[int]struct{}),
 			GetAccountListFunc: getTestAccounts,
+		},
+		Account: accountview.AccountModel{
+			AddEntry: addBookEntry,
 		},
 	}
 }
@@ -141,4 +145,16 @@ func createAccount(name string, excludable bool) account.Account {
 		Book:             entries,
 		UpdatedTimestamp: time.Now(),
 	}
+}
+
+func addBookEntry(a *account.Account, amount decimal.Decimal) *account.Account {
+	a.Book = append(
+		a.Book,
+		bookentry.BookEntry{
+			Id:        uuid.New(),
+			Amount:    amount,
+			Timestamp: time.Now(),
+		},
+	)
+	return a
 }

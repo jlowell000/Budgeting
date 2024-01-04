@@ -56,11 +56,6 @@ func (m AppModel) View() string {
 		return "\n  See you later!\n\n"
 	}
 	if m.Main.Chosen == true {
-		if m.Main.Choice == 1 {
-
-		} else if m.Main.Choice == 2 {
-
-		}
 		switch m.Main.Choice {
 		case 1:
 			s = flowlist.FlowListView(&m)
@@ -106,4 +101,8 @@ func (m *AppModel) GetForm() *form.FormModel {
 
 func (m *AppModel) GetAccountList() *accountlist.AccountListModel {
 	return &m.AccountList
+}
+
+func (m *AppModel) GetAccountView() *accountview.AccountModel {
+	return &m.Account
 }

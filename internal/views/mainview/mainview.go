@@ -29,12 +29,12 @@ func MainUpdate(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "j", "down":
+		case "down":
 			main.Choice++
 			if main.Choice > len(mainChoises) {
 				main.Choice = len(mainChoises)
 			}
-		case "k", "up":
+		case "up":
 			main.Choice--
 			if main.Choice < 1 {
 				main.Choice = 1

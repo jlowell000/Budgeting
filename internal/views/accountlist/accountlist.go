@@ -42,12 +42,12 @@ func AccountListUpdate(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "j", "down":
+		case "down":
 			accountList.Choice++
 			if accountList.Choice > len(accountList.Accounts)-1 {
 				accountList.Choice = len(accountList.Accounts) - 1
 			}
-		case "k", "up":
+		case "up":
 			accountList.Choice--
 			if accountList.Choice < 0 {
 				accountList.Choice = 0
