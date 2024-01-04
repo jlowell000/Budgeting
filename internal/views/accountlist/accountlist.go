@@ -3,11 +3,10 @@ package accountlist
 import (
 	"fmt"
 
+	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/google/uuid"
-	"github.com/shopspring/decimal"
 	"jlowell000.github.io/budgeting/internal/model/account"
-	"jlowell000.github.io/budgeting/internal/model/period"
 	"jlowell000.github.io/budgeting/internal/views/form"
 	"jlowell000.github.io/budgeting/internal/views/mainview"
 	"jlowell000.github.io/budgeting/internal/views/util"
@@ -21,11 +20,11 @@ type AccountListModel struct {
 	Chosen   bool
 
 	/* Tell the model how to Create a flows */
-	CreateAccountFunc func(string, decimal.Decimal, period.Period) account.Account
+	CreateAccountFunc func(string, bool) account.Account
 	/* Tell the model how to get list of accounts */
 	GetAccountListFunc func() []account.Account
 	/* Update FlowList */
-	UpdateAccountFunc func(uuid.UUID, string, decimal.Decimal, period.Period) account.Account
+	UpdateAccountFunc func(uuid.UUID, string, bool) account.Account
 }
 
 type Model interface {
@@ -39,6 +38,8 @@ func AccountListUpdate(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 	main := m.GetMain()
 	accountList := m.GetAccountList()
 	accountList.Accounts = accountList.GetAccountListFunc()
+	form := m.GetForm()
+
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -52,6 +53,11 @@ func AccountListUpdate(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 			if accountList.Choice < 0 {
 				accountList.Choice = 0
 			}
+
+		case "n":
+			form.LastScreen = 2
+			form.Inputs = createFormInputs()
+			main.Choice = 3
 
 		case "b":
 			main.Chosen = false
@@ -86,4 +92,50 @@ func AccountListView(m Model) string {
 func DisplayString(a account.Account) string {
 	return "Name: " + a.Name + "; " +
 		"Amount: " + a.GetLatestBookEntry().Amount.String() + ";"
+}
+
+func createFormInputs() []textinput.Model {
+	inputs := make([]textinput.Model, 2)
+	var t textinput.Model
+	for i := range inputs {
+		t = textinput.New()
+		t.Cursor.Style = util.CursorStyle
+		t.CharLimit = 32
+
+		switch i {
+		case 0:
+			t.Placeholder = "Name"
+		case 2:
+			t.Placeholder = "Exclude"
+			// TODO valideate as Y/N
+		}
+
+		inputs[i] = t
+	}
+
+	return inputs
+}
+
+func checkFormForNewData(
+	accountList *AccountListModel,
+	form *form.FormModel,
+) bool {
+	if form.Submitted {
+		if !accountList.Chosen {
+			accountList.CreateAccountFunc(
+				form.Inputs[0].Value(),
+				form.Inputs[1].Value() == "Y",
+			)
+		} else {
+			accountList.Chosen = false
+			accountList.UpdateAccountFunc(
+				accountList.Accounts[accountList.Choice].Id,
+				form.Inputs[0].Value(),
+				form.Inputs[1].Value() == "Y",
+			)
+		}
+		form.ResetForm()
+		return true
+	}
+	return false
 }

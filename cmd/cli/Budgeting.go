@@ -63,6 +63,7 @@ func initialModel() views.AppModel {
 		AccountList: accountlist.AccountListModel{
 			Accounts:           accounts,
 			Selected:           make(map[int]struct{}),
+			CreateAccountFunc:  createAccountFunc,
 			GetAccountListFunc: getTestAccounts,
 		},
 		Account: accountview.AccountModel{
@@ -145,6 +146,32 @@ func createAccount(name string, excludable bool) account.Account {
 		Book:             entries,
 		UpdatedTimestamp: time.Now(),
 	}
+}
+
+func createAccountFunc(name string, excludable bool) account.Account {
+	a := &account.Account{
+		Id:               uuid.New(),
+		Name:             name,
+		Excludable:       excludable,
+		UpdatedTimestamp: time.Now(),
+	}
+	accounts = append(accounts, *a)
+	return *a
+}
+
+func updateAccount(
+	id uuid.UUID,
+	name string,
+	excludable bool,
+) *account.Account {
+	for _, f := range accounts {
+		if f.Id == id {
+			f.Name = name
+			f.Excludable = excludable
+			return &f
+		}
+	}
+	return nil
 }
 
 func addBookEntry(a *account.Account, amount decimal.Decimal) *account.Account {
