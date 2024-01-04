@@ -47,6 +47,16 @@ func TestPeriodicFlowToJSON(t *testing.T) {
 	}
 }
 
+func TestPeriodStrings(t *testing.T) {
+
+	for i, s := range PeriodStrings {
+		expected := i
+		actual := int(PeriodFromText(s))
+
+		assert.Equal(t, expected, actual)
+	}
+}
+
 func periodWeekContract(p Period) decimal.Decimal {
 	switch p {
 	default:

@@ -1,4 +1,4 @@
-package periodic_flow
+package periodicflow
 
 import (
 	"encoding/json"
@@ -28,17 +28,31 @@ Returns PeriodicFlow of PeriodicFlow
 */
 func New(
 	id uuid.UUID,
+	name string,
 	amount decimal.Decimal,
 	period period.Period,
 	timestamp time.Time,
 ) *PeriodicFlow {
 	return &PeriodicFlow{
 		Id:               id,
+		Name:             name,
 		Amount:           amount,
 		Period:           period,
 		WeeklyAmount:     amount.Mul(period.WeeklyAmount()),
 		UpdatedTimestamp: timestamp,
 	}
+}
+
+func (f *PeriodicFlow) Update(
+	name string,
+	amount decimal.Decimal,
+	period period.Period,
+) *PeriodicFlow {
+	f.Name = name
+	f.Amount = amount
+	f.Period = period
+	f.WeeklyAmount = f.Amount.Mul(f.Period.WeeklyAmount())
+	return f
 }
 
 /*
