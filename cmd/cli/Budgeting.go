@@ -107,28 +107,38 @@ func getTestAccounts() []account.Account {
 }
 
 func createTestAccounts() []account.Account {
-	amount := decimal.NewFromFloat(666.66)
 	testSize := 10
 	testSizeSlice := make([]int, testSize)
 	var accounts []account.Account
 	for i := range testSizeSlice {
 		testSizeSlice[i] = i
-		accounts = append(accounts, createAccount(amount, false))
+		accounts = append(accounts, createAccount("acc"+fmt.Sprint(i), false))
 	}
 	return accounts
 }
 
-func createAccount(amount decimal.Decimal, excludable bool) account.Account {
-	return account.Account{
-		Id:         uuid.New(),
-		Excludable: excludable,
-		Book: []bookentry.BookEntry{
-			{
+func createAccount(name string, excludable bool) account.Account {
+	amount := decimal.NewFromFloat(111.11)
+	testSize := 10
+	testSizeSlice := make([]int, testSize)
+	var entries []bookentry.BookEntry
+	for i := range testSizeSlice {
+		testSizeSlice[i] = i
+		entries = append(
+			entries,
+			bookentry.BookEntry{
 				Id:        uuid.New(),
-				Amount:    amount,
+				Amount:    amount.Mul(decimal.NewFromInt(int64(i))),
 				Timestamp: time.Now(),
 			},
-		},
+		)
+	}
+
+	return account.Account{
+		Id:               uuid.New(),
+		Name:             name,
+		Excludable:       excludable,
+		Book:             entries,
 		UpdatedTimestamp: time.Now(),
 	}
 }

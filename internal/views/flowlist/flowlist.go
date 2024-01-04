@@ -92,10 +92,19 @@ func FlowListView(m Model) string {
 
 	flows := ""
 	for i, f := range flowList.Flows {
-		flows += fmt.Sprintf("%s\n", util.Checkbox(f.String(), c == i))
+		flows += fmt.Sprintf(
+			"%s\n",
+			util.Checkbox(displayString(f), c == i),
+		)
 	}
 
 	return fmt.Sprintf(tpl, flows)
+}
+
+func displayString(f *periodicflow.PeriodicFlow) string {
+	return "Name: " + f.Name + "; " +
+		"Amount: " + f.Amount.String() + "; " +
+		"Period: " + f.Period.String() + "; "
 }
 
 func createFormInputs(
