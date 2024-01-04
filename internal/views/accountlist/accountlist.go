@@ -10,11 +10,12 @@ import (
 )
 
 type AccountListModel struct {
-	Accounts []account.Account // list of flows
-	Choice   int
-	Cursor   int
-	Selected map[int]struct{}
-	Chosen   bool
+	Accounts           []account.Account // list of flows
+	Choice             int
+	Cursor             int
+	Selected           map[int]struct{}
+	Chosen             bool
+	GetAccountListFunc func() []account.Account
 }
 
 type Model interface {
@@ -26,6 +27,7 @@ type Model interface {
 func AccountListUpdate(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 	main := m.GetMain()
 	accountList := m.GetAccountList()
+	accountList.Accounts = accountList.GetAccountListFunc()
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -40,7 +42,7 @@ func AccountListUpdate(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 				accountList.Choice = 0
 			}
 
-		case "b", "backspace":
+		case "b":
 			main.Chosen = false
 		case "enter":
 			accountList.Chosen = true

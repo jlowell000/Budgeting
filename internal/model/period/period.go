@@ -31,6 +31,14 @@ var Periods = [5]Period{
 	Daily,
 }
 
+var PeriodStrings = [5]string{
+	Unknown.String(),
+	Weekly.String(),
+	Monthly.String(),
+	Yearly.String(),
+	Daily.String(),
+}
+
 /*
 Convert Period to []byte for JSON. To fulfil TextMarshaller interface.
 */

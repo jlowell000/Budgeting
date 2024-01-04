@@ -5,6 +5,7 @@ import (
 	"github.com/muesli/reflow/indent"
 
 	"jlowell000.github.io/budgeting/internal/views/accountlist"
+	"jlowell000.github.io/budgeting/internal/views/flowform"
 	"jlowell000.github.io/budgeting/internal/views/flowlist"
 	"jlowell000.github.io/budgeting/internal/views/mainview"
 )
@@ -12,6 +13,7 @@ import (
 type AppModel struct {
 	Main        mainview.MainModel
 	FlowList    flowlist.FlowListModel
+	FlowForm    flowform.FlowFormModel
 	AccountList accountlist.AccountListModel
 	Quitting    bool
 }
@@ -32,10 +34,13 @@ func (m AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	if m.Main.Chosen == true {
-		if m.Main.Choice == 1 {
+		switch m.Main.Choice {
+		case 1:
 			return flowlist.FlowListUpdate(msg, &m)
-		} else if m.Main.Choice == 2 {
+		case 2:
 			return accountlist.AccountListUpdate(msg, &m)
+		case 3:
+			return flowform.FlowListUpdate(msg, &m)
 		}
 	}
 	return mainview.MainUpdate(msg, &m)
@@ -48,14 +53,37 @@ func (m AppModel) View() string {
 	}
 	if m.Main.Chosen == true {
 		if m.Main.Choice == 1 {
-			s = flowlist.FlowListView(&m)
+
 		} else if m.Main.Choice == 2 {
+
+		}
+		switch m.Main.Choice {
+		case 1:
+			s = flowlist.FlowListView(&m)
+		case 2:
 			s = accountlist.AccountListView(&m)
+		case 3:
+			s = flowform.FlowFormView(&m)
 		}
 	} else {
 		s = mainview.MainView(&m)
 	}
 	return indent.String("\n"+s+"\n\n", 2)
+}
+
+func (m *AppModel) UpdateInputs(msg tea.Msg) tea.Cmd {
+	if m.Main.Chosen == true {
+		if m.Main.Choice == 3 {
+			cmds := make([]tea.Cmd, len(m.FlowForm.Inputs))
+
+			for i := range m.FlowForm.Inputs {
+				m.FlowForm.Inputs[i], cmds[i] = m.FlowForm.Inputs[i].Update(msg)
+			}
+
+			return tea.Batch(cmds...)
+		}
+	}
+	return nil
 }
 
 func (m *AppModel) GetMain() *mainview.MainModel {
@@ -64,6 +92,10 @@ func (m *AppModel) GetMain() *mainview.MainModel {
 
 func (m *AppModel) GetFlowList() *flowlist.FlowListModel {
 	return &m.FlowList
+}
+
+func (m *AppModel) GetFlowForm() *flowform.FlowFormModel {
+	return &m.FlowForm
 }
 
 func (m *AppModel) GetAccountList() *accountlist.AccountListModel {

@@ -28,6 +28,16 @@ const (
 	ENTRYLIST_FILENAME = "./data.json"
 )
 
+var (
+	flows = []*periodicflow.PeriodicFlow{
+		periodicflow.New(uuid.New(), "1", decimal.NewFromFloat(666.66), period.Weekly, time.Now()),
+		periodicflow.New(uuid.New(), "2", decimal.NewFromFloat(123.66), period.Weekly, time.Now()),
+		periodicflow.New(uuid.New(), "3", decimal.NewFromFloat(542.66), period.Weekly, time.Now()),
+		periodicflow.New(uuid.New(), "4", decimal.NewFromFloat(1366.66), period.Weekly, time.Now()),
+	}
+	accounts = createTestAccounts()
+)
+
 func main() {
 	p := tea.NewProgram(initialModel())
 	if _, err := p.Run(); err != nil {
@@ -43,25 +53,37 @@ func initialModel() views.AppModel {
 			Selected: make(map[int]struct{}),
 		},
 		FlowList: flowlist.FlowListModel{
-			Flows:    createTestFlows(),
-			Selected: make(map[int]struct{}),
+			Flows:           flows,
+			Selected:        make(map[int]struct{}),
+			GetFlowListFunc: getTestFlows,
+			CreateFlowFunc:  createTestFlow,
 		},
 		AccountList: accountlist.AccountListModel{
-			Accounts: createTestAccounts(),
-			Selected: make(map[int]struct{}),
+			Accounts:           accounts,
+			Selected:           make(map[int]struct{}),
+			GetAccountListFunc: getTestAccounts,
 		},
 	}
 }
 
 //TODO: below is test data to be removed in later issues
 
-func createTestFlows() []periodicflow.PeriodicFlow {
-	return []periodicflow.PeriodicFlow{
-		*periodicflow.New(uuid.New(), decimal.NewFromFloat(666.66), period.Weekly, time.Now()),
-		*periodicflow.New(uuid.New(), decimal.NewFromFloat(123.66), period.Weekly, time.Now()),
-		*periodicflow.New(uuid.New(), decimal.NewFromFloat(542.66), period.Weekly, time.Now()),
-		*periodicflow.New(uuid.New(), decimal.NewFromFloat(1366.66), period.Weekly, time.Now()),
-	}
+func getTestFlows() []*periodicflow.PeriodicFlow {
+	return flows
+}
+
+func createTestFlow(
+	name string,
+	amount decimal.Decimal,
+	period period.Period,
+) *periodicflow.PeriodicFlow {
+	f := periodicflow.New(uuid.New(), name, amount, period, time.Now())
+	flows = append(flows, f)
+	return f
+}
+
+func getTestAccounts() []account.Account {
+	return accounts
 }
 
 func createTestAccounts() []account.Account {

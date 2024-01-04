@@ -28,12 +28,14 @@ Returns PeriodicFlow of PeriodicFlow
 */
 func New(
 	id uuid.UUID,
+	name string,
 	amount decimal.Decimal,
 	period period.Period,
 	timestamp time.Time,
 ) *PeriodicFlow {
 	return &PeriodicFlow{
 		Id:               id,
+		Name:             name,
 		Amount:           amount,
 		Period:           period,
 		WeeklyAmount:     amount.Mul(period.WeeklyAmount()),

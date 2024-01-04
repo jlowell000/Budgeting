@@ -3,6 +3,7 @@ package util
 import (
 	"fmt"
 
+	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/termenv"
 )
 
@@ -11,12 +12,22 @@ var (
 	Keyword = makeFgStyle("211")
 	Subtle  = makeFgStyle("241")
 	Dot     = ColorFg(" • ", "236")
+
+	FocusedStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
+	BlurredStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
+	CursorStyle         = FocusedStyle.Copy()
+	NoStyle             = lipgloss.NewStyle()
+	HelpStyle           = BlurredStyle.Copy()
+	CursorModeHelpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("244"))
+
+	FocusedButton = FocusedStyle.Copy().Render("[ Submit ]")
+	BlurredButton = fmt.Sprintf("[ %s ]", BlurredStyle.Render("Submit"))
 )
 
 func Instructions() string {
 	return Subtle("j/k, up/down: select") + Dot +
 		Subtle("enter: choose") + Dot +
-		Subtle("b, backspace: previous screen") + Dot +
+		Subtle("b: previous screen") + Dot +
 		Subtle("q, esc: quit")
 }
 
