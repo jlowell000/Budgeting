@@ -6,11 +6,11 @@ import (
 
 	"jlowell000.github.io/budgeting/internal/views/accountlist"
 	"jlowell000.github.io/budgeting/internal/views/flowlist"
-	"jlowell000.github.io/budgeting/internal/views/main"
+	"jlowell000.github.io/budgeting/internal/views/mainview"
 )
 
 type AppModel struct {
-	Main        main.MainModel
+	Main        mainview.MainModel
 	FlowList    flowlist.FlowListModel
 	AccountList accountlist.AccountListModel
 	Quitting    bool
@@ -31,8 +31,6 @@ func (m AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	// Hand off the message and model to the appropriate update function for the
-	// appropriate view based on the current state.
 	if m.Main.Chosen == true {
 		if m.Main.Choice == 1 {
 			return flowlist.FlowListUpdate(msg, &m)
@@ -40,7 +38,7 @@ func (m AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return accountlist.AccountListUpdate(msg, &m)
 		}
 	}
-	return main.MainUpdate(msg, &m)
+	return mainview.MainUpdate(msg, &m)
 }
 
 func (m AppModel) View() string {
@@ -55,12 +53,12 @@ func (m AppModel) View() string {
 			s = accountlist.AccountListView(&m)
 		}
 	} else {
-		s = main.MainView(&m)
+		s = mainview.MainView(&m)
 	}
 	return indent.String("\n"+s+"\n\n", 2)
 }
 
-func (m *AppModel) GetMain() *main.MainModel {
+func (m *AppModel) GetMain() *mainview.MainModel {
 	return &m.Main
 }
 

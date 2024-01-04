@@ -13,6 +13,13 @@ var (
 	Dot     = ColorFg(" • ", "236")
 )
 
+func Instructions() string {
+	return Subtle("j/k, up/down: select") + Dot +
+		Subtle("enter: choose") + Dot +
+		Subtle("b, backspace: previous screen") + Dot +
+		Subtle("q, esc: quit")
+}
+
 func Checkbox(label string, checked bool) string {
 	if checked {
 		return ColorFg("[x] "+label, "212")

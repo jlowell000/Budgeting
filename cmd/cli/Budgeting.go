@@ -16,7 +16,7 @@ import (
 	"jlowell000.github.io/budgeting/internal/views"
 	"jlowell000.github.io/budgeting/internal/views/accountlist"
 	"jlowell000.github.io/budgeting/internal/views/flowlist"
-	mainview "jlowell000.github.io/budgeting/internal/views/main"
+	"jlowell000.github.io/budgeting/internal/views/mainview"
 )
 
 const (

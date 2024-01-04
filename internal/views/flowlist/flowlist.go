@@ -5,7 +5,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	periodic_flow "jlowell000.github.io/budgeting/internal/model/periodicflow"
-	"jlowell000.github.io/budgeting/internal/views/main"
+	"jlowell000.github.io/budgeting/internal/views/mainview"
 	"jlowell000.github.io/budgeting/internal/views/util"
 )
 
@@ -19,7 +19,7 @@ type FlowListModel struct {
 
 type Model interface {
 	tea.Model
-	GetMain() *main.MainModel
+	GetMain() *mainview.MainModel
 	GetFlowList() *FlowListModel
 }
 
@@ -57,9 +57,7 @@ func FlowListView(m Model) string {
 	// The header
 	tpl := "Viewing Periodic Flows?\n\n"
 	tpl += "%s\n\n"
-	tpl += util.Subtle("j/k, up/down: select") + util.Dot +
-		util.Subtle("enter: choose") + util.Dot +
-		util.Subtle("q, esc: quit")
+	tpl += util.Instructions()
 
 	flows := ""
 	for i, f := range flowList.Flows {

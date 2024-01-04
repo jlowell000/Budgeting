@@ -1,4 +1,4 @@
-package main
+package mainview
 
 import (
 	"fmt"
@@ -54,10 +54,7 @@ func MainView(m Model) string {
 
 	tpl := "What to do?\n\n"
 	tpl += "%s\n\n"
-	tpl += util.Subtle("j/k, up/down: select") + util.Dot +
-		util.Subtle("enter: choose") + util.Dot +
-		util.Subtle("q, esc: quit")
-
+	tpl += util.Instructions()
 	choices := ""
 	for i, f := range mainChoises {
 		choices += fmt.Sprintf("%s\n", util.Checkbox(f, c == i+1))
