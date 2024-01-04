@@ -2,6 +2,7 @@ package util
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/termenv"
@@ -50,4 +51,8 @@ func makeFgStyle(color string) func(string) string {
 func IsMoneyNumber(input string) error {
 	_, err := decimal.NewFromString(input)
 	return err
+}
+
+func TimeFormat(t time.Time) string {
+	return t.Format("2006-01-02 15:04:05")
 }

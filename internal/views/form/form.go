@@ -37,6 +37,7 @@ func FormUpdate(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 		case "b":
 			main.Chosen = true
 			main.Choice = form.LastScreen
+			form.Submitted = false
 		// Change cursor mode
 		case "ctrl+r":
 			form.CursorMode++
@@ -127,6 +128,6 @@ func FormView(m Model) string {
 func (f *FormModel) ResetForm() {
 	f.LastScreen = 0
 	f.FocusIndex = 0
-	f.Inputs = make([]textinput.Model, 0)
+	f.Inputs = make([]textinput.Model, 1)
 	f.Submitted = false
 }

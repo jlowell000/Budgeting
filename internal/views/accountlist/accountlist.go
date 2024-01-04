@@ -13,7 +13,7 @@ import (
 )
 
 type AccountListModel struct {
-	Accounts []account.Account
+	Accounts []*account.Account
 	Choice   int
 	Cursor   int
 	Selected map[int]struct{}
@@ -22,9 +22,9 @@ type AccountListModel struct {
 	/* Tell the model how to Create a flows */
 	CreateAccountFunc func(string, bool) account.Account
 	/* Tell the model how to get list of accounts */
-	GetAccountListFunc func() []account.Account
+	GetAccountListFunc func() []*account.Account
 	/* Update FlowList */
-	UpdateAccountFunc func(uuid.UUID, string, bool) account.Account
+	UpdateAccountFunc func(uuid.UUID, string, bool) *account.Account
 }
 
 type Model interface {
@@ -39,6 +39,7 @@ func AccountListUpdate(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 	accountList := m.GetAccountList()
 	accountList.Accounts = accountList.GetAccountListFunc()
 	form := m.GetForm()
+	checkFormForNewData(accountList, form)
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -54,9 +55,19 @@ func AccountListUpdate(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 				accountList.Choice = 0
 			}
 
+		case "e":
+			accountList.Chosen = true
+			c := accountList.Choice
+			form.LastScreen = 2
+			form.Inputs = createFormInputs(
+				accountList.Accounts[c].Name,
+				accountList.Accounts[c].Excludable,
+			)
+			main.Choice = 3
+
 		case "n":
 			form.LastScreen = 2
-			form.Inputs = createFormInputs()
+			form.Inputs = createFormInputs("", false)
 			main.Choice = 3
 
 		case "b":
@@ -89,14 +100,31 @@ func AccountListView(m Model) string {
 	return fmt.Sprintf(tpl, accounts)
 }
 
-func DisplayString(a account.Account) string {
-	return "Name: " + a.Name + "; " +
-		"Amount: " + a.GetLatestBookEntry().Amount.String() + ";"
+func DisplayString(a *account.Account) string {
+	str := "Name: " + a.Name + util.Dot +
+		"Amount: " + a.GetLatestBookEntry().Amount.String() + util.Dot +
+		"Updated: " + util.TimeFormat(a.UpdatedTimestamp)
+
+	if a.Excludable {
+		str += util.Dot + "Excluded"
+	}
+	return str
 }
 
-func createFormInputs() []textinput.Model {
+func createFormInputs(
+	name string,
+	excludeable bool,
+) []textinput.Model {
 	inputs := make([]textinput.Model, 2)
 	var t textinput.Model
+
+	var excludeString string
+	if excludeable {
+		excludeString = "Y"
+	} else {
+		excludeString = "N"
+	}
+
 	for i := range inputs {
 		t = textinput.New()
 		t.Cursor.Style = util.CursorStyle
@@ -105,8 +133,10 @@ func createFormInputs() []textinput.Model {
 		switch i {
 		case 0:
 			t.Placeholder = "Name"
-		case 2:
+			t.SetValue(name)
+		case 1:
 			t.Placeholder = "Exclude"
+			t.SetValue(excludeString)
 			// TODO valideate as Y/N
 		}
 
@@ -127,15 +157,17 @@ func checkFormForNewData(
 				form.Inputs[1].Value() == "Y",
 			)
 		} else {
-			accountList.Chosen = false
 			accountList.UpdateAccountFunc(
 				accountList.Accounts[accountList.Choice].Id,
 				form.Inputs[0].Value(),
 				form.Inputs[1].Value() == "Y",
 			)
 		}
+		accountList.Chosen = false
 		form.ResetForm()
 		return true
 	}
+	accountList.Chosen = false
+	form.ResetForm()
 	return false
 }

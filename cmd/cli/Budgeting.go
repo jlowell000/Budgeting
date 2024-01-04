@@ -65,6 +65,7 @@ func initialModel() views.AppModel {
 			Selected:           make(map[int]struct{}),
 			CreateAccountFunc:  createAccountFunc,
 			GetAccountListFunc: getTestAccounts,
+			UpdateAccountFunc:  updateAccount,
 		},
 		Account: accountview.AccountModel{
 			AddEntry: addBookEntry,
@@ -107,14 +108,14 @@ func updateTestFlow(
 	return nil
 }
 
-func getTestAccounts() []account.Account {
+func getTestAccounts() []*account.Account {
 	return accounts
 }
 
-func createTestAccounts() []account.Account {
+func createTestAccounts() []*account.Account {
 	testSize := 10
 	testSizeSlice := make([]int, testSize)
-	var accounts []account.Account
+	var accounts []*account.Account
 	for i := range testSizeSlice {
 		testSizeSlice[i] = i
 		accounts = append(accounts, createAccount("acc"+fmt.Sprint(i), false))
@@ -122,7 +123,7 @@ func createTestAccounts() []account.Account {
 	return accounts
 }
 
-func createAccount(name string, excludable bool) account.Account {
+func createAccount(name string, excludable bool) *account.Account {
 	amount := decimal.NewFromFloat(111.11)
 	testSize := 10
 	testSizeSlice := make([]int, testSize)
@@ -139,7 +140,7 @@ func createAccount(name string, excludable bool) account.Account {
 		)
 	}
 
-	return account.Account{
+	return &account.Account{
 		Id:               uuid.New(),
 		Name:             name,
 		Excludable:       excludable,
@@ -155,7 +156,7 @@ func createAccountFunc(name string, excludable bool) account.Account {
 		Excludable:       excludable,
 		UpdatedTimestamp: time.Now(),
 	}
-	accounts = append(accounts, *a)
+	accounts = append(accounts, a)
 	return *a
 }
 
@@ -164,11 +165,12 @@ func updateAccount(
 	name string,
 	excludable bool,
 ) *account.Account {
-	for _, f := range accounts {
+	for i, f := range accounts {
 		if f.Id == id {
 			f.Name = name
 			f.Excludable = excludable
-			return &f
+			accounts[i] = f
+			return f
 		}
 	}
 	return nil

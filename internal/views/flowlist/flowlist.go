@@ -102,9 +102,10 @@ func FlowListView(m Model) string {
 }
 
 func displayString(f *periodicflow.PeriodicFlow) string {
-	return "Name: " + f.Name + "; " +
-		"Amount: " + f.Amount.String() + "; " +
-		"Period: " + f.Period.String() + "; "
+	return "Name: " + f.Name + util.Dot +
+		"Amount: " + f.Amount.String() + util.Dot +
+		"Period: " + f.Period.String() + util.Dot +
+		"Updated: " + util.TimeFormat(f.UpdatedTimestamp)
 }
 
 func createFormInputs(
@@ -153,7 +154,6 @@ func checkFormForNewData(flowList *FlowListModel, form *form.FormModel) bool {
 				period.PeriodFromText(form.Inputs[2].Value()),
 			)
 		} else {
-			flowList.Chosen = false
 			flowList.UpdateFlowFunc(
 				flowList.Flows[flowList.Choice].Id,
 				form.Inputs[0].Value(),
@@ -161,9 +161,12 @@ func checkFormForNewData(flowList *FlowListModel, form *form.FormModel) bool {
 				period.PeriodFromText(form.Inputs[2].Value()),
 			)
 		}
+		flowList.Chosen = false
 		form.ResetForm()
 		return true
 	}
+	flowList.Chosen = false
+	form.ResetForm()
 	return false
 }
 

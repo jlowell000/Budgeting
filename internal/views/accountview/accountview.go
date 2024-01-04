@@ -70,7 +70,7 @@ func AccountView(m Model) string {
 }
 
 func entryDisplay(e bookentry.BookEntry) string {
-	return "Timestamp: " + e.Timestamp.String() + "; " +
+	return "Timestamp: " + util.TimeFormat(e.Timestamp) + util.Dot +
 		"Amount: " + e.Amount.String()
 }
 
@@ -102,7 +102,7 @@ func checkFormForNewData(
 	if form.Submitted {
 		d, _ := decimal.NewFromString(form.Inputs[0].Value())
 		account.AddEntry(
-			&accountList.Accounts[accountList.Choice],
+			accountList.Accounts[accountList.Choice],
 			d,
 		)
 
