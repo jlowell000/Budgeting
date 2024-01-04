@@ -6,42 +6,44 @@ import (
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
 	"jlowell000.github.io/budgeting/internal/model/period"
 	"jlowell000.github.io/budgeting/internal/model/periodicflow"
-	"jlowell000.github.io/budgeting/internal/views/flowform"
+	"jlowell000.github.io/budgeting/internal/views/form"
 	"jlowell000.github.io/budgeting/internal/views/mainview"
 	"jlowell000.github.io/budgeting/internal/views/util"
 )
 
 type FlowListModel struct {
-	Flows    []*periodicflow.PeriodicFlow // list of flows
+	/* list of flows */
+	Flows    []*periodicflow.PeriodicFlow
 	Choice   int
 	Cursor   int
 	Selected map[int]struct{}
 	Chosen   bool
 
+	/* Tell the model how to Create a flows */
+	CreateFlowFunc func(string, decimal.Decimal, period.Period) *periodicflow.PeriodicFlow
+	/* Tell the model how to get list of flows */
 	GetFlowListFunc func() []*periodicflow.PeriodicFlow
-	CreateFlowFunc  func(
-		string,
-		decimal.Decimal,
-		period.Period,
-	) *periodicflow.PeriodicFlow
+	/* Update FlowList */
+	UpdateFlowFunc func(uuid.UUID, string, decimal.Decimal, period.Period) *periodicflow.PeriodicFlow
 }
 
 type Model interface {
 	tea.Model
 	GetMain() *mainview.MainModel
 	GetFlowList() *FlowListModel
-	GetFlowForm() *flowform.FlowFormModel
+	GetForm() *form.FormModel
 }
 
 func FlowListUpdate(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 	main := m.GetMain()
 	flowList := m.GetFlowList()
-	flowform := m.GetFlowForm()
+	form := m.GetForm()
 	flowList.Flows = flowList.GetFlowListFunc()
-	checkFormForNewData(flowList, m.GetFlowForm())
+	checkFormForNewData(flowList, form)
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -58,13 +60,21 @@ func FlowListUpdate(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 			}
 
 		case "n":
-			flowform.LastScreen = 1
-			flowform.Inputs = createFormInputs()
+			form.LastScreen = 1
+			form.Inputs = createFormInputs("", decimal.NewFromFloat(0.0), period.Weekly)
 			main.Choice = 3
 		case "b":
 			main.Chosen = false
 		case "enter":
 			flowList.Chosen = true
+			form.LastScreen = 1
+			c := flowList.Choice
+			form.Inputs = createFormInputs(
+				flowList.Flows[c].Name,
+				flowList.Flows[c].Amount,
+				flowList.Flows[c].Period,
+			)
+			main.Choice = 3
 		}
 	}
 
@@ -88,7 +98,11 @@ func FlowListView(m Model) string {
 	return fmt.Sprintf(tpl, flows)
 }
 
-func createFormInputs() []textinput.Model {
+func createFormInputs(
+	n string,
+	a decimal.Decimal,
+	p period.Period,
+) []textinput.Model {
 	inputs := make([]textinput.Model, 3)
 	var t textinput.Model
 	for i := range inputs {
@@ -99,14 +113,16 @@ func createFormInputs() []textinput.Model {
 		switch i {
 		case 0:
 			t.Placeholder = "Name"
-			t.Focus()
+			t.SetValue(n)
 			t.PromptStyle = util.FocusedStyle
 			t.TextStyle = util.FocusedStyle
 		case 1:
 			t.Placeholder = "Amount"
+			t.SetValue(a.String())
 			t.Validate = isMoneyNumber
 		case 2:
 			t.Placeholder = "Period"
+			t.SetValue(p.String())
 			t.SetSuggestions(period.PeriodStrings[1:])
 			t.ShowSuggestions = true
 		}
@@ -117,20 +133,26 @@ func createFormInputs() []textinput.Model {
 	return inputs
 }
 
-func checkFormForNewData(flowList *FlowListModel, flowform *flowform.FlowFormModel) bool {
-	if flowform.Submitted {
-		d, _ := decimal.NewFromString(flowform.Inputs[1].Value())
-		// flow :=
-		flowList.CreateFlowFunc(
-			flowform.Inputs[0].Value(),
-			d,
-			period.PeriodFromText(flowform.Inputs[2].Value()),
-		)
-		// flowList.Flows = append(flowList.Flows, flow)
-		flowform.LastScreen = 0
-		flowform.FocusIndex = 0
-		flowform.Inputs = make([]textinput.Model, 0)
-		flowform.Submitted = false
+func checkFormForNewData(flowList *FlowListModel, form *form.FormModel) bool {
+	if form.Submitted {
+		d, _ := decimal.NewFromString(form.Inputs[1].Value())
+
+		if !flowList.Chosen {
+			flowList.CreateFlowFunc(
+				form.Inputs[0].Value(),
+				d,
+				period.PeriodFromText(form.Inputs[2].Value()),
+			)
+		} else {
+			flowList.Chosen = false
+			flowList.UpdateFlowFunc(
+				flowList.Flows[flowList.Choice].Id,
+				form.Inputs[0].Value(),
+				d,
+				period.PeriodFromText(form.Inputs[2].Value()),
+			)
+		}
+		form.ResetForm()
 		return true
 	}
 	return false

@@ -55,8 +55,9 @@ func initialModel() views.AppModel {
 		FlowList: flowlist.FlowListModel{
 			Flows:           flows,
 			Selected:        make(map[int]struct{}),
-			GetFlowListFunc: getTestFlows,
 			CreateFlowFunc:  createTestFlow,
+			GetFlowListFunc: getTestFlows,
+			UpdateFlowFunc:  updateTestFlow,
 		},
 		AccountList: accountlist.AccountListModel{
 			Accounts:           accounts,
@@ -80,6 +81,25 @@ func createTestFlow(
 	f := periodicflow.New(uuid.New(), name, amount, period, time.Now())
 	flows = append(flows, f)
 	return f
+}
+
+func updateTestFlow(
+	id uuid.UUID,
+	name string,
+	amount decimal.Decimal,
+	period period.Period,
+) *periodicflow.PeriodicFlow {
+	for i, f := range flows {
+		if f.Id == id {
+			flows[i] = f.Update(
+				name,
+				amount,
+				period,
+			)
+			return flows[i]
+		}
+	}
+	return nil
 }
 
 func getTestAccounts() []account.Account {

@@ -43,6 +43,18 @@ func New(
 	}
 }
 
+func (f *PeriodicFlow) Update(
+	name string,
+	amount decimal.Decimal,
+	period period.Period,
+) *PeriodicFlow {
+	f.Name = name
+	f.Amount = amount
+	f.Period = period
+	f.WeeklyAmount = f.Amount.Mul(f.Period.WeeklyAmount())
+	return f
+}
+
 /*
 Returns JSON encoding of PeriodicFlow
 */

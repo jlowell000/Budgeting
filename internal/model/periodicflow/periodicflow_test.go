@@ -136,6 +136,19 @@ func TestPeriodicFlow_Projected_change_different_periods(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
+func TestPeriodicFlow_Update(t *testing.T) {
+	id := getUUID(TEST_ID)
+	timestamp := getTime(TEST_TIME)
+	expected := New(id, TEST_NAME, TEST_AMOUNT, period.Daily, timestamp)
+	actual := New(id, TEST_NAME, TEST_AMOUNT, period.Daily, timestamp)
+	assert.Equal(t, expected, actual)
+	for _, p := range period.Periods {
+		expected = New(id, TEST_NAME, TEST_AMOUNT, p, timestamp)
+		actual = actual.Update(actual.Name, actual.Amount, p)
+		assert.Equal(t, expected, actual)
+	}
+}
+
 func getPFParsedValues() (uuid.UUID, time.Time) {
 	id, err1 := uuid.Parse(TEST_ID)
 	if err1 != nil {

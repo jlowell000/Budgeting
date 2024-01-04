@@ -5,15 +5,15 @@ import (
 	"github.com/muesli/reflow/indent"
 
 	"jlowell000.github.io/budgeting/internal/views/accountlist"
-	"jlowell000.github.io/budgeting/internal/views/flowform"
 	"jlowell000.github.io/budgeting/internal/views/flowlist"
+	"jlowell000.github.io/budgeting/internal/views/form"
 	"jlowell000.github.io/budgeting/internal/views/mainview"
 )
 
 type AppModel struct {
 	Main        mainview.MainModel
 	FlowList    flowlist.FlowListModel
-	FlowForm    flowform.FlowFormModel
+	FlowForm    form.FormModel
 	AccountList accountlist.AccountListModel
 	Quitting    bool
 }
@@ -40,7 +40,7 @@ func (m AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case 2:
 			return accountlist.AccountListUpdate(msg, &m)
 		case 3:
-			return flowform.FlowListUpdate(msg, &m)
+			return form.FormUpdate(msg, &m)
 		}
 	}
 	return mainview.MainUpdate(msg, &m)
@@ -63,7 +63,7 @@ func (m AppModel) View() string {
 		case 2:
 			s = accountlist.AccountListView(&m)
 		case 3:
-			s = flowform.FlowFormView(&m)
+			s = form.FormView(&m)
 		}
 	} else {
 		s = mainview.MainView(&m)
@@ -94,7 +94,7 @@ func (m *AppModel) GetFlowList() *flowlist.FlowListModel {
 	return &m.FlowList
 }
 
-func (m *AppModel) GetFlowForm() *flowform.FlowFormModel {
+func (m *AppModel) GetForm() *form.FormModel {
 	return &m.FlowForm
 }
 
