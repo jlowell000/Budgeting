@@ -127,12 +127,12 @@ func createAccount(name string, excludable bool) *account.Account {
 	amount := decimal.NewFromFloat(111.11)
 	testSize := 10
 	testSizeSlice := make([]int, testSize)
-	var entries []bookentry.BookEntry
+	var entries []*bookentry.BookEntry
 	for i := range testSizeSlice {
 		testSizeSlice[i] = i
 		entries = append(
 			entries,
-			bookentry.BookEntry{
+			&bookentry.BookEntry{
 				Id:        uuid.New(),
 				Amount:    amount.Mul(decimal.NewFromInt(int64(i))),
 				Timestamp: time.Now(),
@@ -179,7 +179,7 @@ func updateAccount(
 func addBookEntry(a *account.Account, amount decimal.Decimal) *account.Account {
 	a.Book = append(
 		a.Book,
-		bookentry.BookEntry{
+		&bookentry.BookEntry{
 			Id:        uuid.New(),
 			Amount:    amount,
 			Timestamp: time.Now(),

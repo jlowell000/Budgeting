@@ -63,7 +63,7 @@ func AccountView(m Model) string {
 
 	bookEntries := ""
 	for _, e := range account.Book {
-		bookEntries += fmt.Sprintf("%s\n", entryDisplay(e))
+		bookEntries += fmt.Sprintf("%s\n", entryDisplay(*e))
 	}
 
 	return fmt.Sprintf(tpl, bookEntries)
