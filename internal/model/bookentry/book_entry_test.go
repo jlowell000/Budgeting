@@ -113,6 +113,18 @@ func TestRateOfChange(t *testing.T) {
 	}
 }
 
+func Test_New(t *testing.T) {
+	id := uuid.New()
+	timestamp := time.Now()
+	actual := New(id, TEST_AMOUNT, timestamp)
+	expected := &BookEntry{
+		Id:        id,
+		Amount:    TEST_AMOUNT,
+		Timestamp: timestamp,
+	}
+	assert.Equal(t, expected, actual)
+}
+
 func getPFParsedValues() (uuid.UUID, time.Time) {
 	id, err1 := uuid.Parse(TEST_ID)
 	if err1 != nil {

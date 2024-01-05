@@ -18,6 +18,18 @@ type BookEntry struct {
 	Timestamp time.Time       `json:"timestamp,omitempty"`
 }
 
+func New(
+	id uuid.UUID,
+	amount decimal.Decimal,
+	createTime time.Time,
+) *BookEntry {
+	return &BookEntry{
+		Id:        id,
+		Amount:    amount,
+		Timestamp: createTime,
+	}
+}
+
 // Returns JSON encoding of BookEntry
 func (bookEntry *BookEntry) ToJSON() []byte {
 	data, err := json.Marshal(bookEntry)

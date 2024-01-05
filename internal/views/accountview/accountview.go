@@ -63,15 +63,19 @@ func AccountView(m Model) string {
 
 	bookEntries := ""
 	for _, e := range account.Book {
-		bookEntries += fmt.Sprintf("%s\n", entryDisplay(*e))
+		bookEntries += fmt.Sprintf("%s\n", entryDisplay(e))
 	}
 
 	return fmt.Sprintf(tpl, bookEntries)
 }
 
-func entryDisplay(e bookentry.BookEntry) string {
-	return "Timestamp: " + util.TimeFormat(e.Timestamp) + util.Dot +
-		"Amount: " + e.Amount.String()
+func entryDisplay(e *bookentry.BookEntry) string {
+	str := ""
+	if e != nil {
+		str += "Timestamp: " + util.TimeFormat(e.Timestamp) + util.Dot +
+			"Amount: " + e.Amount.String()
+	}
+	return str
 }
 
 func createFormInputs() []textinput.Model {

@@ -20,7 +20,7 @@ type AccountListModel struct {
 	Chosen   bool
 
 	/* Tell the model how to Create a flows */
-	CreateAccountFunc func(string, bool) account.Account
+	CreateAccountFunc func(string, bool) *account.Account
 	/* Tell the model how to get list of accounts */
 	GetAccountListFunc func() []*account.Account
 	/* Update FlowList */
@@ -101,12 +101,15 @@ func AccountListView(m Model) string {
 }
 
 func DisplayString(a *account.Account) string {
-	str := "Name: " + a.Name + util.Dot +
-		"Amount: " + a.GetLatestBookEntry().Amount.String() + util.Dot +
-		"Updated: " + util.TimeFormat(a.UpdatedTimestamp)
+	str := ""
+	if a != nil {
+		str += "Name: " + a.Name + util.Dot +
+			"Amount: " + a.GetLatestBookEntry().Amount.String() + util.Dot +
+			"Updated: " + util.TimeFormat(a.UpdatedTimestamp)
 
-	if a.Excludable {
-		str += util.Dot + "Excluded"
+		if a.Excludable {
+			str += util.Dot + "Excluded"
+		}
 	}
 	return str
 }

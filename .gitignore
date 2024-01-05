@@ -21,5 +21,6 @@
 go.work
 cmd/cli/Budgeting
 Budgeting
+data.json
 cmd/cli/entrylist.json
 stringer

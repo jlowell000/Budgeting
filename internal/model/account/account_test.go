@@ -312,6 +312,36 @@ func Test_SumExclusion_accounts(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
+func Test_New(t *testing.T) {
+	id := uuid.New()
+	timestamp := time.Now()
+	actual := New(id, TEST_NAME, false, timestamp)
+	expected := &Account{
+		Id:               id,
+		Name:             TEST_NAME,
+		Excludable:       false,
+		Book:             []*bookentry.BookEntry{},
+		UpdatedTimestamp: timestamp,
+	}
+	assert.Equal(t, expected, actual)
+}
+
+func Test_Update(t *testing.T) {
+	id := uuid.New()
+	timestamp1 := time.UnixMilli(1000000)
+	timestamp2 := time.UnixMilli(2000000)
+	actual := New(id, TEST_NAME, false, timestamp1)
+	actual = actual.Update(TEST_NAME+"Test", true, timestamp2)
+	expected := &Account{
+		Id:               id,
+		Name:             TEST_NAME + "Test",
+		Excludable:       true,
+		Book:             []*bookentry.BookEntry{},
+		UpdatedTimestamp: timestamp2,
+	}
+	assert.Equal(t, *expected, *actual)
+}
+
 func createAccount(amount decimal.Decimal, excludable bool) Account {
 	return Account{
 		Id:         uuid.New(),

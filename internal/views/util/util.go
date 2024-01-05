@@ -30,6 +30,7 @@ func Instructions() string {
 	return Subtle("up/down: select") + Dot +
 		Subtle("enter: choose") + Dot +
 		Subtle("b: previous screen") + Dot +
+		Subtle("s: save data") + Dot +
 		Subtle("q, esc: quit")
 }
 

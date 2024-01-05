@@ -18,6 +18,8 @@ type AppModel struct {
 	AccountList accountlist.AccountListModel
 	Account     accountview.AccountModel
 	Quitting    bool
+
+	SavaDataFunc func()
 }
 
 func (m AppModel) Init() tea.Cmd {
@@ -105,4 +107,8 @@ func (m *AppModel) GetAccountList() *accountlist.AccountListModel {
 
 func (m *AppModel) GetAccountView() *accountview.AccountModel {
 	return &m.Account
+}
+
+func (m *AppModel) SavaData() {
+	m.SavaDataFunc()
 }

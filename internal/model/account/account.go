@@ -21,6 +21,32 @@ type Account struct {
 	UpdatedTimestamp time.Time              `json:"updated_timestamp,omitempty"`
 }
 
+func New(
+	id uuid.UUID,
+	name string,
+	excludable bool,
+	createTime time.Time,
+) *Account {
+	return &Account{
+		Id:               id,
+		Name:             name,
+		Excludable:       excludable,
+		Book:             []*bookentry.BookEntry{},
+		UpdatedTimestamp: createTime,
+	}
+}
+
+func (f *Account) Update(
+	name string,
+	excludable bool,
+	updateTime time.Time,
+) *Account {
+	f.Name = name
+	f.Excludable = excludable
+	f.UpdatedTimestamp = updateTime
+	return f
+}
+
 // Returns JSON encoding of Account
 func (account *Account) ToJSON() []byte {
 	data, err := json.Marshal(account)
