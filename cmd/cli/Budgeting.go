@@ -12,6 +12,7 @@ import (
 	"jlowell000.github.io/budgeting/internal/model/bookentry"
 	"jlowell000.github.io/budgeting/internal/model/period"
 	"jlowell000.github.io/budgeting/internal/model/periodicflow"
+	"jlowell000.github.io/budgeting/internal/service/dataservice"
 
 	"jlowell000.github.io/budgeting/internal/views"
 	"jlowell000.github.io/budgeting/internal/views/accountlist"
@@ -30,13 +31,7 @@ const (
 )
 
 var (
-	flows = []*periodicflow.PeriodicFlow{
-		periodicflow.New(uuid.New(), "1", decimal.NewFromFloat(666.66), period.Weekly, time.Now()),
-		periodicflow.New(uuid.New(), "2", decimal.NewFromFloat(123.66), period.Weekly, time.Now()),
-		periodicflow.New(uuid.New(), "3", decimal.NewFromFloat(542.66), period.Weekly, time.Now()),
-		periodicflow.New(uuid.New(), "4", decimal.NewFromFloat(1366.66), period.Weekly, time.Now()),
-	}
-	accounts = createTestAccounts()
+	data *dataservice.DataModel
 )
 
 func main() {
@@ -48,44 +43,47 @@ func main() {
 }
 
 func initialModel() views.AppModel {
+	data = dataservice.GetDataFromFile(ENTRYLIST_FILENAME)
+
 	return views.AppModel{
 		Main: mainview.MainModel{
 			Choice:   1,
 			Selected: make(map[int]struct{}),
 		},
 		FlowList: flowlist.FlowListModel{
-			Flows:           flows,
+			Flows:           data.Flows,
 			Selected:        make(map[int]struct{}),
-			CreateFlowFunc:  createTestFlow,
+			CreateFlowFunc:  createFlow,
 			GetFlowListFunc: getTestFlows,
 			UpdateFlowFunc:  updateTestFlow,
 		},
 		AccountList: accountlist.AccountListModel{
-			Accounts:           accounts,
+			Accounts:           data.Accounts,
 			Selected:           make(map[int]struct{}),
-			CreateAccountFunc:  createAccountFunc,
-			GetAccountListFunc: getTestAccounts,
+			CreateAccountFunc:  createAccount,
+			GetAccountListFunc: getAccounts,
 			UpdateAccountFunc:  updateAccount,
 		},
 		Account: accountview.AccountModel{
 			AddEntry: addBookEntry,
 		},
+		SavaDataFunc: func() { dataservice.SaveDataToFile(data, ENTRYLIST_FILENAME) },
 	}
 }
 
 //TODO: below is test data to be removed in later issues
 
 func getTestFlows() []*periodicflow.PeriodicFlow {
-	return flows
+	return data.Flows
 }
 
-func createTestFlow(
+func createFlow(
 	name string,
 	amount decimal.Decimal,
 	period period.Period,
 ) *periodicflow.PeriodicFlow {
 	f := periodicflow.New(uuid.New(), name, amount, period, time.Now())
-	flows = append(flows, f)
+	data.Flows = append(data.Flows, f)
 	return f
 }
 
@@ -95,69 +93,33 @@ func updateTestFlow(
 	amount decimal.Decimal,
 	period period.Period,
 ) *periodicflow.PeriodicFlow {
-	for i, f := range flows {
+	for i, f := range data.Flows {
 		if f.Id == id {
-			flows[i] = f.Update(
+			data.Flows[i] = f.Update(
 				name,
 				amount,
 				period,
+				time.Now(),
 			)
-			return flows[i]
+			return data.Flows[i]
 		}
 	}
 	return nil
 }
 
-func getTestAccounts() []*account.Account {
-	return accounts
-}
-
-func createTestAccounts() []*account.Account {
-	testSize := 10
-	testSizeSlice := make([]int, testSize)
-	var accounts []*account.Account
-	for i := range testSizeSlice {
-		testSizeSlice[i] = i
-		accounts = append(accounts, createAccount("acc"+fmt.Sprint(i), false))
-	}
-	return accounts
+func getAccounts() []*account.Account {
+	return data.Accounts
 }
 
 func createAccount(name string, excludable bool) *account.Account {
-	amount := decimal.NewFromFloat(111.11)
-	testSize := 10
-	testSizeSlice := make([]int, testSize)
-	var entries []bookentry.BookEntry
-	for i := range testSizeSlice {
-		testSizeSlice[i] = i
-		entries = append(
-			entries,
-			bookentry.BookEntry{
-				Id:        uuid.New(),
-				Amount:    amount.Mul(decimal.NewFromInt(int64(i))),
-				Timestamp: time.Now(),
-			},
-		)
-	}
-
-	return &account.Account{
-		Id:               uuid.New(),
-		Name:             name,
-		Excludable:       excludable,
-		Book:             entries,
-		UpdatedTimestamp: time.Now(),
-	}
-}
-
-func createAccountFunc(name string, excludable bool) account.Account {
-	a := &account.Account{
-		Id:               uuid.New(),
-		Name:             name,
-		Excludable:       excludable,
-		UpdatedTimestamp: time.Now(),
-	}
-	accounts = append(accounts, a)
-	return *a
+	a := account.New(
+		uuid.New(),
+		name,
+		excludable,
+		time.Now(),
+	)
+	data.Accounts = append(data.Accounts, a)
+	return a
 }
 
 func updateAccount(
@@ -165,11 +127,13 @@ func updateAccount(
 	name string,
 	excludable bool,
 ) *account.Account {
-	for i, f := range accounts {
+	for i, f := range data.Accounts {
 		if f.Id == id {
-			f.Name = name
-			f.Excludable = excludable
-			accounts[i] = f
+			data.Accounts[i] = f.Update(
+				name,
+				excludable,
+				time.Now(),
+			)
 			return f
 		}
 	}
@@ -179,11 +143,11 @@ func updateAccount(
 func addBookEntry(a *account.Account, amount decimal.Decimal) *account.Account {
 	a.Book = append(
 		a.Book,
-		bookentry.BookEntry{
-			Id:        uuid.New(),
-			Amount:    amount,
-			Timestamp: time.Now(),
-		},
+		bookentry.New(
+			uuid.New(),
+			amount,
+			time.Now(),
+		),
 	)
 	return a
 }

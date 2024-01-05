@@ -18,6 +18,18 @@ type BookEntry struct {
 	Timestamp time.Time       `json:"timestamp,omitempty"`
 }
 
+func New(
+	id uuid.UUID,
+	amount decimal.Decimal,
+	createTime time.Time,
+) *BookEntry {
+	return &BookEntry{
+		Id:        id,
+		Amount:    amount,
+		Timestamp: createTime,
+	}
+}
+
 // Returns JSON encoding of BookEntry
 func (bookEntry *BookEntry) ToJSON() []byte {
 	data, err := json.Marshal(bookEntry)
@@ -43,7 +55,7 @@ Rate of change between two entries.
 
 Returns in units of `Money / Millisecond`
 */
-func RateOfChange(a BookEntry, b BookEntry) decimal.Decimal {
+func RateOfChange(a *BookEntry, b *BookEntry) decimal.Decimal {
 	timeDiff := b.Timestamp.UnixMilli() - a.Timestamp.UnixMilli()
 	return (b.Amount.Sub(a.Amount)).Div(decimal.NewFromInt(timeDiff))
 }

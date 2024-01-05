@@ -22,6 +22,7 @@ var mainChoises = []string{
 type Model interface {
 	tea.Model
 	GetMain() *MainModel
+	SavaData()
 }
 
 func MainUpdate(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
@@ -39,6 +40,9 @@ func MainUpdate(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 			if main.Choice < 1 {
 				main.Choice = 1
 			}
+		case "s":
+			m.SavaData()
+
 		case "enter":
 			main.Chosen = true
 			return m, nil

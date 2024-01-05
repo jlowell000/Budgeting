@@ -31,7 +31,7 @@ func New(
 	name string,
 	amount decimal.Decimal,
 	period period.Period,
-	timestamp time.Time,
+	createTime time.Time,
 ) *PeriodicFlow {
 	return &PeriodicFlow{
 		Id:               id,
@@ -39,7 +39,7 @@ func New(
 		Amount:           amount,
 		Period:           period,
 		WeeklyAmount:     amount.Mul(period.WeeklyAmount()),
-		UpdatedTimestamp: timestamp,
+		UpdatedTimestamp: createTime,
 	}
 }
 
@@ -47,11 +47,13 @@ func (f *PeriodicFlow) Update(
 	name string,
 	amount decimal.Decimal,
 	period period.Period,
+	updateTime time.Time,
 ) *PeriodicFlow {
 	f.Name = name
 	f.Amount = amount
 	f.Period = period
 	f.WeeklyAmount = f.Amount.Mul(f.Period.WeeklyAmount())
+	f.UpdatedTimestamp = updateTime
 	return f
 }
 

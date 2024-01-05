@@ -69,9 +69,13 @@ func AccountView(m Model) string {
 	return fmt.Sprintf(tpl, bookEntries)
 }
 
-func entryDisplay(e bookentry.BookEntry) string {
-	return "Timestamp: " + util.TimeFormat(e.Timestamp) + util.Dot +
-		"Amount: " + e.Amount.String()
+func entryDisplay(e *bookentry.BookEntry) string {
+	str := ""
+	if e != nil {
+		str += "Timestamp: " + util.TimeFormat(e.Timestamp) + util.Dot +
+			"Amount: " + e.Amount.String()
+	}
+	return str
 }
 
 func createFormInputs() []textinput.Model {

@@ -144,7 +144,7 @@ func TestPeriodicFlow_Update(t *testing.T) {
 	assert.Equal(t, expected, actual)
 	for _, p := range period.Periods {
 		expected = New(id, TEST_NAME, TEST_AMOUNT, p, timestamp)
-		actual = actual.Update(actual.Name, actual.Amount, p)
+		actual = actual.Update(actual.Name, actual.Amount, p, timestamp)
 		assert.Equal(t, expected, actual)
 	}
 }

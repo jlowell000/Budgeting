@@ -102,10 +102,14 @@ func FlowListView(m Model) string {
 }
 
 func displayString(f *periodicflow.PeriodicFlow) string {
-	return "Name: " + f.Name + util.Dot +
-		"Amount: " + f.Amount.String() + util.Dot +
-		"Period: " + f.Period.String() + util.Dot +
-		"Updated: " + util.TimeFormat(f.UpdatedTimestamp)
+	str := ""
+	if f != nil {
+		str += "Name: " + f.Name + util.Dot +
+			"Amount: " + f.Amount.String() + util.Dot +
+			"Period: " + f.Period.String() + util.Dot +
+			"Updated: " + util.TimeFormat(f.UpdatedTimestamp)
+	}
+	return str
 }
 
 func createFormInputs(

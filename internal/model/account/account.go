@@ -14,11 +14,37 @@ import (
 Struct for defining a Account.
 */
 type Account struct {
-	Id               uuid.UUID             `json:"id"`
-	Name             string                `json:"name,omitempty"`
-	Excludable       bool                  `json:"excludable"`
-	Book             []bookentry.BookEntry `json:"book,omitempty"`
-	UpdatedTimestamp time.Time             `json:"updated_timestamp,omitempty"`
+	Id               uuid.UUID              `json:"id"`
+	Name             string                 `json:"name,omitempty"`
+	Excludable       bool                   `json:"excludable"`
+	Book             []*bookentry.BookEntry `json:"book,omitempty"`
+	UpdatedTimestamp time.Time              `json:"updated_timestamp,omitempty"`
+}
+
+func New(
+	id uuid.UUID,
+	name string,
+	excludable bool,
+	createTime time.Time,
+) *Account {
+	return &Account{
+		Id:               id,
+		Name:             name,
+		Excludable:       excludable,
+		Book:             []*bookentry.BookEntry{},
+		UpdatedTimestamp: createTime,
+	}
+}
+
+func (f *Account) Update(
+	name string,
+	excludable bool,
+	updateTime time.Time,
+) *Account {
+	f.Name = name
+	f.Excludable = excludable
+	f.UpdatedTimestamp = updateTime
+	return f
 }
 
 // Returns JSON encoding of Account
@@ -62,13 +88,13 @@ func SumExclusion(accounts []Account) decimal.Decimal {
 }
 
 // Returns Latest Book entry for Account
-func (account *Account) GetLatestBookEntry() bookentry.BookEntry {
+func (account *Account) GetLatestBookEntry() *bookentry.BookEntry {
 	_, b := account.GetBookEndEntries()
 	return b
 }
 
 // Returns Earliest Book entry for Account
-func (account *Account) GetEarliestBookEntry() bookentry.BookEntry {
+func (account *Account) GetEarliestBookEntry() *bookentry.BookEntry {
 	a, _ := account.GetBookEndEntries()
 	return a
 }
@@ -76,9 +102,9 @@ func (account *Account) GetEarliestBookEntry() bookentry.BookEntry {
 /*
 Get the earliest and latest entries from the account book
 */
-func (account *Account) GetBookEndEntries() (bookentry.BookEntry, bookentry.BookEntry) {
-	var first bookentry.BookEntry
-	var second bookentry.BookEntry
+func (account *Account) GetBookEndEntries() (*bookentry.BookEntry, *bookentry.BookEntry) {
+	var first *bookentry.BookEntry
+	var second *bookentry.BookEntry
 
 	if len(account.Book) > 0 {
 		first = account.Book[0]

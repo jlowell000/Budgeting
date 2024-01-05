@@ -30,7 +30,7 @@ func TestAccountToJSON(t *testing.T) {
 		Id:         id,
 		Name:       TEST_NAME,
 		Excludable: TEST_FLAG,
-		Book: []bookentry.BookEntry{
+		Book: []*bookentry.BookEntry{
 			{
 				Id:        id,
 				Amount:    TEST_AMOUNT,
@@ -52,7 +52,7 @@ func TestAccountFromJSON_data_there(t *testing.T) {
 		Id:         id,
 		Name:       TEST_NAME,
 		Excludable: TEST_FLAG,
-		Book: []bookentry.BookEntry{
+		Book: []*bookentry.BookEntry{
 			{
 				Id:        id,
 				Amount:    TEST_AMOUNT,
@@ -74,7 +74,7 @@ func TestAccountFromJSON_partial_data_there(t *testing.T) {
 
 	expected := Account{
 		Id: id,
-		Book: []bookentry.BookEntry{
+		Book: []*bookentry.BookEntry{
 			{
 				Id:        id,
 				Amount:    TEST_AMOUNT,
@@ -98,14 +98,14 @@ func TestAccountFromJSON_no_data(t *testing.T) {
 }
 
 func Test_GetLatestBookEntry(t *testing.T) {
-	expected := bookentry.BookEntry{
+	expected := &bookentry.BookEntry{
 		Id:        uuid.New(),
 		Amount:    decimal.NewFromFloat(666.6),
 		Timestamp: time.Now(),
 	}
 	account := Account{
 		Id: uuid.New(),
-		Book: []bookentry.BookEntry{
+		Book: []*bookentry.BookEntry{
 			{
 				Id:        uuid.New(),
 				Amount:    TEST_AMOUNT,
@@ -136,13 +136,13 @@ func Test_GetLatestBookEntry(t *testing.T) {
 }
 
 func Test_GetEarliestBookEntry(t *testing.T) {
-	expected := bookentry.BookEntry{
+	expected := &bookentry.BookEntry{
 		Id:        uuid.New(),
 		Timestamp: time.UnixMilli(100000),
 	}
 	account := Account{
 		Id: uuid.New(),
-		Book: []bookentry.BookEntry{
+		Book: []*bookentry.BookEntry{
 			{
 				Id:        uuid.New(),
 				Timestamp: time.UnixMilli(500000),
@@ -169,18 +169,18 @@ func Test_GetEarliestBookEntry(t *testing.T) {
 }
 
 func Test_GetBookEndEntries(t *testing.T) {
-	expected1 := bookentry.BookEntry{
+	expected1 := &bookentry.BookEntry{
 		Id:        uuid.New(),
 		Timestamp: time.UnixMilli(100000),
 	}
 
-	expected2 := bookentry.BookEntry{
+	expected2 := &bookentry.BookEntry{
 		Id:        uuid.New(),
 		Timestamp: time.UnixMilli(700000),
 	}
 	account := Account{
 		Id: uuid.New(),
-		Book: []bookentry.BookEntry{
+		Book: []*bookentry.BookEntry{
 			{
 				Id:        uuid.New(),
 				Timestamp: time.UnixMilli(500000),
@@ -224,8 +224,8 @@ func TestRateOfChange(t *testing.T) {
 			expected := di.Div(decimal.NewFromInt(dj))
 			account := Account{
 				Id: uuid.New(),
-				Book: []bookentry.BookEntry{
-					a,
+				Book: []*bookentry.BookEntry{
+					&a,
 					{
 						Amount:    di,
 						Timestamp: time.UnixMilli(dj),
@@ -245,8 +245,8 @@ func TestRateOfChange(t *testing.T) {
 			expected := di.Div(decimal.NewFromInt(dj))
 			account := Account{
 				Id: uuid.New(),
-				Book: []bookentry.BookEntry{
-					a,
+				Book: []*bookentry.BookEntry{
+					&a,
 					{
 						Amount:    di,
 						Timestamp: time.UnixMilli(dj),
@@ -262,14 +262,14 @@ func TestRateOfChange(t *testing.T) {
 	expected := decimal.NewFromInt(0)
 	account := Account{
 		Id:               uuid.New(),
-		Book:             []bookentry.BookEntry{a},
+		Book:             []*bookentry.BookEntry{&a},
 		UpdatedTimestamp: time.Now(),
 	}
 	assert.True(t, expected.Equals(account.RateOfChange()))
 
 	account = Account{
 		Id:               uuid.New(),
-		Book:             []bookentry.BookEntry{},
+		Book:             []*bookentry.BookEntry{},
 		UpdatedTimestamp: time.Now(),
 	}
 	assert.True(t, expected.Equals(account.RateOfChange()))
@@ -312,11 +312,41 @@ func Test_SumExclusion_accounts(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
+func Test_New(t *testing.T) {
+	id := uuid.New()
+	timestamp := time.Now()
+	actual := New(id, TEST_NAME, false, timestamp)
+	expected := &Account{
+		Id:               id,
+		Name:             TEST_NAME,
+		Excludable:       false,
+		Book:             []*bookentry.BookEntry{},
+		UpdatedTimestamp: timestamp,
+	}
+	assert.Equal(t, expected, actual)
+}
+
+func Test_Update(t *testing.T) {
+	id := uuid.New()
+	timestamp1 := time.UnixMilli(1000000)
+	timestamp2 := time.UnixMilli(2000000)
+	actual := New(id, TEST_NAME, false, timestamp1)
+	actual = actual.Update(TEST_NAME+"Test", true, timestamp2)
+	expected := &Account{
+		Id:               id,
+		Name:             TEST_NAME + "Test",
+		Excludable:       true,
+		Book:             []*bookentry.BookEntry{},
+		UpdatedTimestamp: timestamp2,
+	}
+	assert.Equal(t, *expected, *actual)
+}
+
 func createAccount(amount decimal.Decimal, excludable bool) Account {
 	return Account{
 		Id:         uuid.New(),
 		Excludable: excludable,
-		Book: []bookentry.BookEntry{
+		Book: []*bookentry.BookEntry{
 			{
 				Id:        uuid.New(),
 				Amount:    amount,
