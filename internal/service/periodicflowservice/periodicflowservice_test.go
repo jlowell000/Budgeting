@@ -67,7 +67,7 @@ func Test_GetAllSortedByDate(t *testing.T) {
 func Test_GetTotalInflow(t *testing.T) {
 	resetData()
 	expected := decimal.NewFromFloat(1666.98)
-	actual := subject.GetTotalInflow()
+	actual := subject.GetTotalWeeklyInflow()
 	assert.Equal(t, 1, getDataCount, "getDataCount")
 	assert.Equal(t, 0, saveDataCount, "saveDataCount")
 	assert.Equal(t, expected, actual, "equality")
@@ -75,7 +75,7 @@ func Test_GetTotalInflow(t *testing.T) {
 func Test_GetTotalOutflow(t *testing.T) {
 	resetData()
 	expected := decimal.NewFromFloat(-334.32)
-	actual := subject.GetTotalOutflow()
+	actual := subject.GetTotalWeeklyOutflow()
 	assert.Equal(t, 1, getDataCount, "getDataCount")
 	assert.Equal(t, 0, saveDataCount, "saveDataCount")
 	assert.Equal(t, expected, actual, "equality")
@@ -84,7 +84,7 @@ func Test_GetTotalOutflow(t *testing.T) {
 func Test_GetTotalFlow(t *testing.T) {
 	resetData()
 	expected := decimal.NewFromFloat(1332.66)
-	actual := subject.GetTotalFlow()
+	actual := subject.GetTotalWeeklyFlow()
 	assert.Equal(t, 1, getDataCount, "getDataCount")
 	assert.Equal(t, 0, saveDataCount, "saveDataCount")
 	assert.Equal(t, expected, actual, "equality")

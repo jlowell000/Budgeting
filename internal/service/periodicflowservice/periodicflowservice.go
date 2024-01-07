@@ -51,7 +51,7 @@ func (p *PeriodicFlowService) GetAllSortedByDate() []*periodicflow.PeriodicFlow 
 	return f
 }
 
-func (p *PeriodicFlowService) GetTotalInflow() decimal.Decimal {
+func (p *PeriodicFlowService) GetTotalWeeklyInflow() decimal.Decimal {
 	return periodicflow.Sum(
 		filterFlows(
 			slices.Clone(p.Dataservice.GetData().Flows),
@@ -60,7 +60,7 @@ func (p *PeriodicFlowService) GetTotalInflow() decimal.Decimal {
 	)
 }
 
-func (p *PeriodicFlowService) GetTotalOutflow() decimal.Decimal {
+func (p *PeriodicFlowService) GetTotalWeeklyOutflow() decimal.Decimal {
 	return periodicflow.Sum(
 		filterFlows(
 			slices.Clone(p.Dataservice.GetData().Flows),
@@ -69,7 +69,7 @@ func (p *PeriodicFlowService) GetTotalOutflow() decimal.Decimal {
 	)
 }
 
-func (p *PeriodicFlowService) GetTotalFlow() decimal.Decimal {
+func (p *PeriodicFlowService) GetTotalWeeklyFlow() decimal.Decimal {
 	return periodicflow.Sum(p.Dataservice.GetData().Flows)
 }
 
