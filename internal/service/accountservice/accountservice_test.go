@@ -1,4 +1,4 @@
-package periodicflowservice
+package accountservice
 
 import (
 	"slices"
@@ -6,11 +6,9 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
+	"jlowell000.github.io/budgeting/internal/model/account"
 	"jlowell000.github.io/budgeting/internal/model/data"
-	"jlowell000.github.io/budgeting/internal/model/period"
-	"jlowell000.github.io/budgeting/internal/model/periodicflow"
 )
 
 var (
@@ -21,7 +19,7 @@ var (
 	testId            = uuid.New()
 	testData      *data.DataModel
 
-	subject = PeriodicFlowService{
+	subject = AccountService{
 		Dataservice: &mockDataService{},
 		GetTime:     func() time.Time { return testTime2 },
 		GetId:       func() uuid.UUID { return testId },
@@ -31,22 +29,22 @@ var (
 func Test_Create(t *testing.T) {
 	resetData()
 	subject.Delete(testId)
-	expected := periodicflow.New(testId, "testCreate", decimal.NewFromFloat(111.11), period.Monthly, testTime2)
-	expectedList := append(slices.Clone(testData.Flows), expected)
-	slices.SortFunc(expectedList, compareFlowId)
-	actual := subject.Create("testCreate", decimal.NewFromFloat(111.11), period.Monthly)
-	actualList := testData.Flows
+	expected := account.New(testId, "testCreate", true, testTime2)
+	expectedList := append(slices.Clone(testData.Accounts), expected)
+	slices.SortFunc(expectedList, compareAccountId)
+	actual := subject.Create("testCreate", true)
+	actualList := testData.Accounts
 
 	assert.Equal(t, 3, getDataCount, "getDataCount")
 	assert.Equal(t, 2, saveDataCount, "saveDataCount")
 	assert.Equal(t, *expected, *actual, "not equal object")
-	assert.Equal(t, findPeriodicFlow(testId, expectedList), findPeriodicFlow(testId, actualList), "same index")
+	assert.Equal(t, findAccount(testId, expectedList), findAccount(testId, actualList), "same index")
 }
 
 func Test_GetAll(t *testing.T) {
 	resetData()
-	expected := slices.Clone(testData.Flows)
-	slices.SortFunc(expected, compareFlowId)
+	expected := slices.Clone(testData.Accounts)
+	slices.SortFunc(expected, compareAccountId)
 	actual := subject.GetAll()
 
 	assert.Equal(t, 1, getDataCount, "getDataCount")
@@ -55,8 +53,8 @@ func Test_GetAll(t *testing.T) {
 }
 func Test_GetAllSortedByDate(t *testing.T) {
 	resetData()
-	expected := slices.Clone(testData.Flows)
-	slices.SortFunc(expected, compareFlowTime)
+	expected := slices.Clone(testData.Accounts)
+	slices.SortFunc(expected, compareAccountTime)
 	actual := subject.GetAllSortedByDate()
 
 	assert.Equal(t, 1, getDataCount, "getDataCount")
@@ -66,8 +64,8 @@ func Test_GetAllSortedByDate(t *testing.T) {
 
 func Test_Update(t *testing.T) {
 	resetData()
-	expected := periodicflow.New(testId, "testEdited", decimal.NewFromFloat(111.11), period.Monthly, testTime2)
-	actual := subject.Update(testId, "testEdited", decimal.NewFromFloat(111.11), period.Monthly)
+	expected := account.New(testId, "testEdited", true, testTime2)
+	actual := subject.Update(testId, "testEdited", true)
 
 	assert.Equal(t, 3, getDataCount, "getDataCount")
 	assert.Equal(t, 1, saveDataCount, "saveDataCount")
@@ -77,15 +75,15 @@ func Test_Update(t *testing.T) {
 func Test_Delete(t *testing.T) {
 	resetData()
 	expected := slices.DeleteFunc(
-		slices.Clone(testData.Flows),
-		func(f *periodicflow.PeriodicFlow) bool { return f.Id == testId },
+		slices.Clone(testData.Accounts),
+		func(f *account.Account) bool { return f.Id == testId },
 	)
-	slices.SortFunc(expected, compareFlowId)
+	slices.SortFunc(expected, compareAccountId)
 	subject.Delete(testId)
 
 	assert.Equal(t, 1, getDataCount, "getDataCount")
 	assert.Equal(t, 1, saveDataCount, "saveDataCount")
-	assert.True(t, !slices.ContainsFunc(testData.Flows, func(f *periodicflow.PeriodicFlow) bool { return f.Id == testId }), "no longer contains")
+	assert.True(t, !slices.ContainsFunc(testData.Accounts, func(f *account.Account) bool { return f.Id == testId }), "no longer contains")
 }
 
 type mockDataService struct{}
@@ -94,12 +92,12 @@ func resetData() {
 	getDataCount = 0
 	saveDataCount = 0
 	testData = &data.DataModel{
-		Flows: []*periodicflow.PeriodicFlow{
-			periodicflow.New(uuid.New(), "testA", decimal.NewFromFloat(111.66), period.Weekly, time.UnixMilli(5000)),
-			periodicflow.New(uuid.New(), "testB", decimal.NewFromFloat(222.66), period.Weekly, time.UnixMilli(4000)),
-			periodicflow.New(testId, "test1", decimal.NewFromFloat(666.66), period.Weekly, testTime),
-			periodicflow.New(uuid.New(), "testC", decimal.NewFromFloat(444.66), period.Weekly, time.UnixMilli(10000)),
-			periodicflow.New(uuid.New(), "testD", decimal.NewFromFloat(555.66), period.Weekly, time.UnixMilli(1000)),
+		Accounts: []*account.Account{
+			account.New(uuid.New(), "testA", false, time.UnixMilli(5000)),
+			account.New(uuid.New(), "testB", false, time.UnixMilli(4000)),
+			account.New(testId, "test1", false, testTime),
+			account.New(uuid.New(), "testC", false, time.UnixMilli(10000)),
+			account.New(uuid.New(), "testD", false, time.UnixMilli(1000)),
 		},
 	}
 

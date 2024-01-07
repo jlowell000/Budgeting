@@ -30,7 +30,7 @@ func (p *PeriodicFlowService) Create(
 	d.Flows = append(d.Flows, f)
 	slices.SortFunc(d.Flows, compareFlowId)
 	p.Dataservice.SaveData(d)
-	return f
+	return p.Get(newId)
 }
 
 func (p *PeriodicFlowService) Get(id uuid.UUID) *periodicflow.PeriodicFlow {
@@ -77,16 +77,8 @@ func (p *PeriodicFlowService) Delete(id uuid.UUID) {
 	p.Dataservice.SaveData(d)
 }
 
-func sort(flows []*periodicflow.PeriodicFlow) []*periodicflow.PeriodicFlow {
-
-	return flows
-}
-
 func findPeriodicFlow(id uuid.UUID, flows []*periodicflow.PeriodicFlow) int {
-	slices.SortFunc(
-		flows,
-		compareFlowId,
-	)
+	slices.SortFunc(flows, compareFlowId)
 	n, _ := slices.BinarySearchFunc(
 		flows,
 		&periodicflow.PeriodicFlow{Id: id},
