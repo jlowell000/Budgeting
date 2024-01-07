@@ -6,8 +6,10 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 	"jlowell000.github.io/budgeting/internal/model/account"
+	"jlowell000.github.io/budgeting/internal/model/bookentry"
 	"jlowell000.github.io/budgeting/internal/model/data"
 )
 
@@ -66,6 +68,20 @@ func Test_Update(t *testing.T) {
 	resetData()
 	expected := account.New(testId, "testEdited", true, testTime2)
 	actual := subject.Update(testId, "testEdited", true)
+
+	assert.Equal(t, 3, getDataCount, "getDataCount")
+	assert.Equal(t, 1, saveDataCount, "saveDataCount")
+	assert.Equal(t, *expected, *actual, "not equal object")
+}
+
+func Test_AddBookEntry(t *testing.T) {
+	resetData()
+	amount := decimal.NewFromInt(123)
+	expected := account.New(testId, "test1", false, testTime2)
+	expected.Book = []*bookentry.BookEntry{
+		bookentry.New(testId, amount, testTime2),
+	}
+	actual := subject.AddBookEntry(testId, amount)
 
 	assert.Equal(t, 3, getDataCount, "getDataCount")
 	assert.Equal(t, 1, saveDataCount, "saveDataCount")

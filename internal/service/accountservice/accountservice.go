@@ -6,7 +6,9 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	"jlowell000.github.io/budgeting/internal/model/account"
+	"jlowell000.github.io/budgeting/internal/model/bookentry"
 	"jlowell000.github.io/budgeting/internal/service"
 )
 
@@ -56,6 +58,21 @@ func (a *AccountService) Update(id uuid.UUID, name string, excludable bool) *acc
 		excludable,
 		a.GetTime(),
 	)
+	a.Dataservice.SaveData(a.Dataservice.GetData())
+	return a.Get(id)
+}
+
+func (a *AccountService) AddBookEntry(id uuid.UUID, amount decimal.Decimal) *account.Account {
+	acc := a.Get(id)
+	acc.Book = append(
+		acc.Book,
+		bookentry.New(
+			a.GetId(),
+			amount,
+			a.GetTime(),
+		),
+	)
+	acc.UpdatedTimestamp = a.GetTime()
 	a.Dataservice.SaveData(a.Dataservice.GetData())
 	return a.Get(id)
 }

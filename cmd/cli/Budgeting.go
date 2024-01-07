@@ -7,10 +7,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/google/uuid"
-	"github.com/shopspring/decimal"
 	"jlowell000.github.io/budgeting/internal/io"
-	"jlowell000.github.io/budgeting/internal/model/account"
-	"jlowell000.github.io/budgeting/internal/model/bookentry"
 	"jlowell000.github.io/budgeting/internal/model/data"
 	"jlowell000.github.io/budgeting/internal/service"
 	"jlowell000.github.io/budgeting/internal/service/accountservice"
@@ -78,20 +75,7 @@ func initialModel() views.AppModel {
 		},
 		Account: accountview.AccountModel{
 			AccountService: accountService,
-			AddEntry:       addBookEntry,
 		},
 		SavaDataFunc: func() { d = ds.SaveData(d) },
 	}
-}
-
-func addBookEntry(a *account.Account, amount decimal.Decimal) *account.Account {
-	a.Book = append(
-		a.Book,
-		bookentry.New(
-			uuid.New(),
-			amount,
-			time.Now(),
-		),
-	)
-	return a
 }

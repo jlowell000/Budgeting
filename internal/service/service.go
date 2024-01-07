@@ -29,5 +29,6 @@ type AccountServiceInterface interface {
 	GetAll() []*account.Account
 	GetAllSortedByDate() []*account.Account
 	Update(id uuid.UUID, name string, excludable bool) *account.Account
+	AddBookEntry(id uuid.UUID, amount decimal.Decimal) *account.Account
 	Delete(id uuid.UUID)
 }

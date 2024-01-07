@@ -6,7 +6,6 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/shopspring/decimal"
-	"jlowell000.github.io/budgeting/internal/model/account"
 	"jlowell000.github.io/budgeting/internal/model/bookentry"
 	"jlowell000.github.io/budgeting/internal/service"
 	"jlowell000.github.io/budgeting/internal/views/accountlist"
@@ -17,7 +16,6 @@ import (
 
 type AccountModel struct {
 	AccountService service.AccountServiceInterface
-	AddEntry       func(*account.Account, decimal.Decimal) *account.Account
 }
 
 type Model interface {
@@ -105,10 +103,9 @@ func checkFormForNewData(
 	accountList *accountlist.AccountListModel,
 	form *form.FormModel,
 ) bool {
-	a := account.AccountService.Get(accountList.ChoiceId)
 	if form.Submitted {
 		d, _ := decimal.NewFromString(form.Inputs[0].Value())
-		account.AddEntry(a, d)
+		account.AccountService.AddBookEntry(accountList.ChoiceId, d)
 		form.ResetForm()
 		return true
 	}
