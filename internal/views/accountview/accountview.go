@@ -8,6 +8,7 @@ import (
 	"github.com/shopspring/decimal"
 	"jlowell000.github.io/budgeting/internal/model/account"
 	"jlowell000.github.io/budgeting/internal/model/bookentry"
+	"jlowell000.github.io/budgeting/internal/service"
 	"jlowell000.github.io/budgeting/internal/views/accountlist"
 	"jlowell000.github.io/budgeting/internal/views/form"
 	"jlowell000.github.io/budgeting/internal/views/mainview"
@@ -15,7 +16,8 @@ import (
 )
 
 type AccountModel struct {
-	AddEntry func(*account.Account, decimal.Decimal) *account.Account
+	AccountService service.AccountServiceInterface
+	AddEntry       func(*account.Account, decimal.Decimal) *account.Account
 }
 
 type Model interface {
@@ -52,9 +54,9 @@ func AccountUpdate(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 }
 
 func AccountView(m Model) string {
+	accountView := m.GetAccountView()
 	accountList := m.GetAccountList()
-	c := accountList.Choice
-	account := accountList.Accounts[c]
+	account := accountView.AccountService.Get(accountList.ChoiceId)
 	// The header
 	tpl := "Viewing Accounts\n\n"
 	tpl += fmt.Sprintf("%s\n\n", accountlist.DisplayString(account))
@@ -103,13 +105,10 @@ func checkFormForNewData(
 	accountList *accountlist.AccountListModel,
 	form *form.FormModel,
 ) bool {
+	a := account.AccountService.Get(accountList.ChoiceId)
 	if form.Submitted {
 		d, _ := decimal.NewFromString(form.Inputs[0].Value())
-		account.AddEntry(
-			accountList.Accounts[accountList.Choice],
-			d,
-		)
-
+		account.AddEntry(a, d)
 		form.ResetForm()
 		return true
 	}

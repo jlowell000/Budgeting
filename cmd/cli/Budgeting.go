@@ -13,6 +13,7 @@ import (
 	"jlowell000.github.io/budgeting/internal/model/bookentry"
 	"jlowell000.github.io/budgeting/internal/model/data"
 	"jlowell000.github.io/budgeting/internal/service"
+	"jlowell000.github.io/budgeting/internal/service/accountservice"
 	"jlowell000.github.io/budgeting/internal/service/dataservice"
 	"jlowell000.github.io/budgeting/internal/service/periodicflowservice"
 
@@ -44,6 +45,11 @@ var (
 		GetTime:     time.Now,
 		GetId:       uuid.New,
 	}
+	accountService service.AccountServiceInterface = &accountservice.AccountService{
+		Dataservice: ds,
+		GetTime:     time.Now,
+		GetId:       uuid.New,
+	}
 )
 
 func main() {
@@ -67,50 +73,15 @@ func initialModel() views.AppModel {
 			FlowService: flowService,
 		},
 		AccountList: accountlist.AccountListModel{
-			Accounts:           d.Accounts,
-			Selected:           make(map[int]struct{}),
-			CreateAccountFunc:  createAccount,
-			GetAccountListFunc: getAccounts,
-			UpdateAccountFunc:  updateAccount,
+			Selected:       make(map[int]struct{}),
+			AccountService: accountService,
 		},
 		Account: accountview.AccountModel{
-			AddEntry: addBookEntry,
+			AccountService: accountService,
+			AddEntry:       addBookEntry,
 		},
 		SavaDataFunc: func() { d = ds.SaveData(d) },
 	}
-}
-
-func getAccounts() []*account.Account {
-	return d.Accounts
-}
-
-func createAccount(name string, excludable bool) *account.Account {
-	a := account.New(
-		uuid.New(),
-		name,
-		excludable,
-		time.Now(),
-	)
-	d.Accounts = append(d.Accounts, a)
-	return a
-}
-
-func updateAccount(
-	id uuid.UUID,
-	name string,
-	excludable bool,
-) *account.Account {
-	for i, f := range d.Accounts {
-		if f.Id == id {
-			d.Accounts[i] = f.Update(
-				name,
-				excludable,
-				time.Now(),
-			)
-			return f
-		}
-	}
-	return nil
 }
 
 func addBookEntry(a *account.Account, amount decimal.Decimal) *account.Account {
