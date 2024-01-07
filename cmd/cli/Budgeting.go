@@ -16,6 +16,7 @@ import (
 	"jlowell000.github.io/budgeting/internal/model/periodicflow"
 	"jlowell000.github.io/budgeting/internal/service"
 	"jlowell000.github.io/budgeting/internal/service/dataservice"
+	"jlowell000.github.io/budgeting/internal/service/periodicflowservice"
 
 	"jlowell000.github.io/budgeting/internal/views"
 	"jlowell000.github.io/budgeting/internal/views/accountlist"
@@ -35,9 +36,14 @@ const (
 
 var (
 	d  *data.DataModel
-	ds service.DataserviceInterface = &dataservice.DataService{
+	ds service.DataServiceInterface = &dataservice.DataService{
+		Filename:    ENTRYLIST_FILENAME,
 		GetDataJSON: io.ReadFromFile,
 		PutDataJSON: io.WriteToFile,
+	}
+	flowService service.PeriodicFlowServiceInterface = &periodicflowservice.PeriodicFlowService{
+		Dataservice: ds,
+		GetTime:     time.Now,
 	}
 )
 
@@ -50,7 +56,7 @@ func main() {
 }
 
 func initialModel() views.AppModel {
-	d = ds.GetDataFromFile(ENTRYLIST_FILENAME)
+	d = ds.GetData()
 
 	return views.AppModel{
 		Main: mainview.MainModel{
@@ -62,7 +68,7 @@ func initialModel() views.AppModel {
 			Selected:        make(map[int]struct{}),
 			CreateFlowFunc:  createFlow,
 			GetFlowListFunc: getTestFlows,
-			UpdateFlowFunc:  updateTestFlow,
+			UpdateFlowFunc:  flowService.UpdatePeriodicFlow,
 		},
 		AccountList: accountlist.AccountListModel{
 			Accounts:           d.Accounts,
@@ -74,7 +80,7 @@ func initialModel() views.AppModel {
 		Account: accountview.AccountModel{
 			AddEntry: addBookEntry,
 		},
-		SavaDataFunc: func() { ds.SaveDataToFile(d, ENTRYLIST_FILENAME) },
+		SavaDataFunc: func() { d = ds.SaveData(d) },
 	}
 }
 
@@ -92,26 +98,6 @@ func createFlow(
 	f := periodicflow.New(uuid.New(), name, amount, period, time.Now())
 	d.Flows = append(d.Flows, f)
 	return f
-}
-
-func updateTestFlow(
-	id uuid.UUID,
-	name string,
-	amount decimal.Decimal,
-	period period.Period,
-) *periodicflow.PeriodicFlow {
-	for i, f := range d.Flows {
-		if f.Id == id {
-			d.Flows[i] = f.Update(
-				name,
-				amount,
-				period,
-				time.Now(),
-			)
-			return d.Flows[i]
-		}
-	}
-	return nil
 }
 
 func getAccounts() []*account.Account {

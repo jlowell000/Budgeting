@@ -19,44 +19,46 @@ import (
 
 const (
 	TEST_FILE_NAME = "test.json"
-	TEST_ID        = "16cfd708-db6d-42fd-8ad1-55316690520c"
-	TEST_TIME      = "2006-01-23T15:04:05Z"
 )
 
 var (
 	getDataJSONCount int = 0
 	putDataJSONCount int = 0
+	testTime             = time.Now()
+	testId               = uuid.New()
 	putDataJSONValue string
 	subject          DataService
 )
 
-func TestGetDataFromFile(t *testing.T) {
-	expected := testData()
-	setUpMocking(t, expected)
-	actual := subject.GetDataFromFile(TEST_FILE_NAME)
+func Test_GetData(t *testing.T) {
+	expected := testData("get")
+	testData := testData("get")
+	setUpMocking(t, testData)
+	actual := subject.GetData()
 
 	assert.Equal(t, expected.ToJSON(), actual.ToJSON())
 	assert.Equal(t, 1, getDataJSONCount, "getDataJSON")
 	assert.Equal(t, 0, putDataJSONCount, "putDataJSONCount")
 }
 
-func TestSaveEntryListToFile(t *testing.T) {
-	expected := testData()
+func Test_SaveData(t *testing.T) {
+	expected := testData("save")
 	setUpMocking(t, expected)
-	subject.SaveDataToFile(expected, TEST_FILE_NAME)
+	testDataModel := testData("save")
+	subject.SaveData(testDataModel)
 
 	assert.Equal(t, 0, getDataJSONCount, "getDataJSONCount")
 	assert.Equal(t, 1, putDataJSONCount, "putDataJSONCount")
-	assert.Equal(t, makaDataJSON(expected), putDataJSONValue, "putDataJSONCount")
+	assert.Equal(t, makaDataJSON(expected), putDataJSONValue, "json not equal")
 }
 
-func testData() *data.DataModel {
+func testData(mod string) *data.DataModel {
 	return &data.DataModel{
 		Flows: []*periodicflow.PeriodicFlow{
-			periodicflow.New(uuid.New(), "1", decimal.NewFromFloat(666.66), period.Weekly, time.Now()),
-			periodicflow.New(uuid.New(), "2", decimal.NewFromFloat(123.66), period.Weekly, time.Now()),
-			periodicflow.New(uuid.New(), "3", decimal.NewFromFloat(542.66), period.Weekly, time.Now()),
-			periodicflow.New(uuid.New(), "4", decimal.NewFromFloat(1366.66), period.Weekly, time.Now()),
+			periodicflow.New(testId, "1"+mod, decimal.NewFromFloat(666.66), period.Weekly, testTime),
+			periodicflow.New(testId, "2"+mod, decimal.NewFromFloat(123.66), period.Weekly, testTime),
+			periodicflow.New(testId, "3"+mod, decimal.NewFromFloat(542.66), period.Weekly, testTime),
+			periodicflow.New(testId, "4"+mod, decimal.NewFromFloat(1366.66), period.Weekly, testTime),
 		},
 		Accounts: createTestAccounts(),
 	}
@@ -64,6 +66,7 @@ func testData() *data.DataModel {
 
 func setUpMocking(t *testing.T, data *data.DataModel) {
 	subject = DataService{
+		Filename: TEST_FILE_NAME,
 		GetDataJSON: func(fileName string) []byte {
 			getDataJSONCount++
 			return data.ToJSON()
@@ -88,11 +91,11 @@ func createTestFlow() []*periodicflow.PeriodicFlow {
 		flows = append(
 			flows,
 			periodicflow.New(
-				uuid.New(),
+				testId,
 				"flow_"+fmt.Sprint(i),
 				decimal.NewFromFloat(111.11).Mul(decimal.NewFromInt(int64(i))),
 				period.Weekly,
-				time.Now(),
+				testTime,
 			),
 		)
 	}
@@ -120,19 +123,19 @@ func createAccount(name string, excludable bool) *account.Account {
 		entries = append(
 			entries,
 			&bookentry.BookEntry{
-				Id:        uuid.New(),
+				Id:        testId,
 				Amount:    amount.Mul(decimal.NewFromInt(int64(i))),
-				Timestamp: time.Now(),
+				Timestamp: testTime,
 			},
 		)
 	}
 
 	return &account.Account{
-		Id:               uuid.New(),
+		Id:               testId,
 		Name:             name,
 		Excludable:       excludable,
 		Book:             entries,
-		UpdatedTimestamp: time.Now(),
+		UpdatedTimestamp: testTime,
 	}
 }
 
