@@ -110,10 +110,10 @@ func TestPeriodicFlow_Sum_different_periods(t *testing.T) {
 	timestamp := getTime(TEST_TIME)
 
 	var expected decimal.Decimal
-	var flows []PeriodicFlow
+	var flows []*PeriodicFlow
 	for _, p := range period.Periods {
 		expected = expected.Add(TEST_AMOUNT.Mul(p.WeeklyAmount()))
-		flows = append(flows, *New(id, TEST_NAME, TEST_AMOUNT, p, timestamp))
+		flows = append(flows, New(id, TEST_NAME, TEST_AMOUNT, p, timestamp))
 	}
 	actual := Sum(flows)
 	assert.Equal(t, expected, actual)
@@ -126,10 +126,10 @@ func TestPeriodicFlow_Projected_change_different_periods(t *testing.T) {
 	projectPeriod := period.Monthly
 
 	var expected decimal.Decimal
-	var flows []PeriodicFlow
+	var flows []*PeriodicFlow
 	for _, p := range period.Periods {
 		expected = expected.Add(TEST_AMOUNT.Mul(p.WeeklyAmount()))
-		flows = append(flows, *New(id, TEST_NAME, TEST_AMOUNT, p, timestamp))
+		flows = append(flows, New(id, TEST_NAME, TEST_AMOUNT, p, timestamp))
 	}
 	expected = expected.Mul(projectAmount).Mul(projectPeriod.WeeklyAmount())
 	actual := ProjectedChange(flows, projectAmount, projectPeriod)

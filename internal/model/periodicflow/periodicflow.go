@@ -80,7 +80,7 @@ func FromJSON(data []byte) PeriodicFlow {
 /*
 Sum the given Periodic Flows' weekly amounts
 */
-func Sum(flows []PeriodicFlow) decimal.Decimal {
+func Sum(flows []*PeriodicFlow) decimal.Decimal {
 	sum := decimal.NewFromInt(0)
 	for _, f := range flows {
 		sum = sum.Add(f.WeeklyAmount)
@@ -92,7 +92,7 @@ func Sum(flows []PeriodicFlow) decimal.Decimal {
 Calculate projected change over time
 */
 func ProjectedChange(
-	flows []PeriodicFlow,
+	flows []*PeriodicFlow,
 	amount decimal.Decimal,
 	period period.Period,
 ) decimal.Decimal {

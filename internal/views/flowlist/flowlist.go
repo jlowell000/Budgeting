@@ -89,6 +89,7 @@ func FlowListView(m Model) string {
 	c := flowList.Choice
 	// The header
 	tpl := "Viewing Periodic Flows\n\n"
+	// tpl += ""
 	tpl += "%s\n\n"
 	tpl += util.Instructions()
 	tpl += util.Dot + util.Subtle("d to delete entry") + util.Dot

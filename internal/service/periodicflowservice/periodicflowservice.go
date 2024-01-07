@@ -51,6 +51,28 @@ func (p *PeriodicFlowService) GetAllSortedByDate() []*periodicflow.PeriodicFlow 
 	return f
 }
 
+func (p *PeriodicFlowService) GetTotalInflow() decimal.Decimal {
+	return periodicflow.Sum(
+		filterFlows(
+			slices.Clone(p.Dataservice.GetData().Flows),
+			func(pf *periodicflow.PeriodicFlow) bool { return pf.Amount.GreaterThan(decimal.Zero) },
+		),
+	)
+}
+
+func (p *PeriodicFlowService) GetTotalOutflow() decimal.Decimal {
+	return periodicflow.Sum(
+		filterFlows(
+			slices.Clone(p.Dataservice.GetData().Flows),
+			func(pf *periodicflow.PeriodicFlow) bool { return pf.Amount.LessThan(decimal.Zero) },
+		),
+	)
+}
+
+func (p *PeriodicFlowService) GetTotalFlow() decimal.Decimal {
+	return periodicflow.Sum(p.Dataservice.GetData().Flows)
+}
+
 func (p *PeriodicFlowService) Update(
 	id uuid.UUID,
 	name string,
@@ -93,4 +115,13 @@ func compareFlowId(a, b *periodicflow.PeriodicFlow) int {
 
 func compareFlowTime(a, b *periodicflow.PeriodicFlow) int {
 	return cmp.Compare(b.UpdatedTimestamp.UnixMilli(), a.UpdatedTimestamp.UnixMilli())
+}
+
+func filterFlows(flows []*periodicflow.PeriodicFlow, test func(*periodicflow.PeriodicFlow) bool) (output []*periodicflow.PeriodicFlow) {
+	for _, f := range flows {
+		if test(f) {
+			output = append(output, f)
+		}
+	}
+	return
 }
