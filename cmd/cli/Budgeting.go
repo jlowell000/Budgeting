@@ -64,9 +64,9 @@ func initialModel() views.AppModel {
 		FlowList: flowlist.FlowListModel{
 			Flows:           d.Flows,
 			Selected:        make(map[int]struct{}),
-			CreateFlowFunc:  flowService.CreatePeriodicFlow,
-			GetFlowListFunc: flowService.GetPeriodicFlows,
-			UpdateFlowFunc:  flowService.UpdatePeriodicFlow,
+			CreateFlowFunc:  flowService.Create,
+			GetFlowListFunc: flowService.GetAll,
+			UpdateFlowFunc:  flowService.Update,
 		},
 		AccountList: accountlist.AccountListModel{
 			Accounts:           d.Accounts,

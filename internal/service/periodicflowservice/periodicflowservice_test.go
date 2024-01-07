@@ -1,6 +1,7 @@
 package periodicflowservice
 
 import (
+	"slices"
 	"testing"
 	"time"
 
@@ -27,34 +28,63 @@ var (
 	}
 )
 
-func Test_CreatePeriodicFlow(t *testing.T) {
+func Test_Create(t *testing.T) {
 	resetData()
 	expected := periodicflow.New(testId, "testEdited", decimal.NewFromFloat(111.11), period.Monthly, testTime2)
-	actual := subject.CreatePeriodicFlow("testEdited", decimal.NewFromFloat(111.11), period.Monthly)
+	expectedList := append(slices.Clone(testData.Flows), expected)
+	slices.SortFunc(expectedList, compareFlowId)
+	actual := subject.Create("testEdited", decimal.NewFromFloat(111.11), period.Monthly)
+	actualList := testData.Flows
 
 	assert.Equal(t, 1, getDataCount, "getDataCount")
 	assert.Equal(t, 1, saveDataCount, "saveDataCount")
 	assert.Equal(t, *expected, *actual, "not equal object")
+	assert.Equal(t, expectedList, actualList, "not equal object")
 }
 
-func Test_GetPeriodicFlows(t *testing.T) {
+func Test_GetAll(t *testing.T) {
 	resetData()
-	expected := testData.Flows
-	actual := subject.GetPeriodicFlows()
+	expected := slices.Clone(testData.Flows)
+	slices.SortFunc(expected, compareFlowId)
+	actual := subject.GetAll()
+
+	assert.Equal(t, 1, getDataCount, "getDataCount")
+	assert.Equal(t, 0, saveDataCount, "saveDataCount")
+	assert.Equal(t, expected, actual, "not equal object")
+}
+func Test_GetAllSortedByDate(t *testing.T) {
+	resetData()
+	expected := slices.Clone(testData.Flows)
+	slices.SortFunc(expected, compareFlowTime)
+	actual := subject.GetAll()
 
 	assert.Equal(t, 1, getDataCount, "getDataCount")
 	assert.Equal(t, 0, saveDataCount, "saveDataCount")
 	assert.Equal(t, expected, actual, "not equal object")
 }
 
-func Test_UpdatePeriodicFlow(t *testing.T) {
+func Test_Update(t *testing.T) {
 	resetData()
 	expected := periodicflow.New(testId, "testEdited", decimal.NewFromFloat(111.11), period.Monthly, testTime2)
-	actual := subject.UpdatePeriodicFlow(testId, "testEdited", decimal.NewFromFloat(111.11), period.Monthly)
+	actual := subject.Update(testId, "testEdited", decimal.NewFromFloat(111.11), period.Monthly)
+
+	assert.Equal(t, 3, getDataCount, "getDataCount")
+	assert.Equal(t, 1, saveDataCount, "saveDataCount")
+	assert.Equal(t, *expected, *actual, "not equal object")
+}
+
+func Test_Delete(t *testing.T) {
+	resetData()
+	expected := slices.DeleteFunc(
+		slices.Clone(testData.Flows),
+		func(f *periodicflow.PeriodicFlow) bool { return f.Id == testId },
+	)
+	slices.SortFunc(expected, compareFlowId)
+	subject.Delete(testId)
 
 	assert.Equal(t, 1, getDataCount, "getDataCount")
 	assert.Equal(t, 1, saveDataCount, "saveDataCount")
-	assert.Equal(t, *expected, *actual, "not equal object")
+	assert.True(t, !slices.ContainsFunc(testData.Flows, func(f *periodicflow.PeriodicFlow) bool { return f.Id == testId }), "no longer contains")
 }
 
 type mockDataService struct{}
@@ -64,7 +94,11 @@ func resetData() {
 	saveDataCount = 0
 	testData = &data.DataModel{
 		Flows: []*periodicflow.PeriodicFlow{
+			periodicflow.New(uuid.New(), "testA", decimal.NewFromFloat(111.66), period.Weekly, testTime2),
+			periodicflow.New(uuid.New(), "testB", decimal.NewFromFloat(222.66), period.Weekly, testTime2),
 			periodicflow.New(testId, "test1", decimal.NewFromFloat(666.66), period.Weekly, testTime),
+			periodicflow.New(uuid.New(), "testC", decimal.NewFromFloat(444.66), period.Weekly, testTime2),
+			periodicflow.New(uuid.New(), "testD", decimal.NewFromFloat(555.66), period.Weekly, testTime2),
 		},
 	}
 

@@ -14,7 +14,10 @@ type DataServiceInterface interface {
 }
 
 type PeriodicFlowServiceInterface interface {
-	CreatePeriodicFlow(string, decimal.Decimal, period.Period) *periodicflow.PeriodicFlow
-	GetPeriodicFlows() []*periodicflow.PeriodicFlow
-	UpdatePeriodicFlow(uuid.UUID, string, decimal.Decimal, period.Period) *periodicflow.PeriodicFlow
+	Create(string, decimal.Decimal, period.Period) *periodicflow.PeriodicFlow
+	Get(uuid.UUID) *periodicflow.PeriodicFlow
+	GetAll() []*periodicflow.PeriodicFlow
+	GetAllSortedByDate() []*periodicflow.PeriodicFlow
+	Update(uuid.UUID, string, decimal.Decimal, period.Period) *periodicflow.PeriodicFlow
+	Delete(uuid.UUID)
 }
