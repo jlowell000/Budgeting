@@ -42,6 +42,7 @@ var (
 	flowService service.PeriodicFlowServiceInterface = &periodicflowservice.PeriodicFlowService{
 		Dataservice: ds,
 		GetTime:     time.Now,
+		GetId:       uuid.New,
 	}
 )
 
@@ -62,11 +63,8 @@ func initialModel() views.AppModel {
 			Selected: make(map[int]struct{}),
 		},
 		FlowList: flowlist.FlowListModel{
-			Flows:           d.Flows,
-			Selected:        make(map[int]struct{}),
-			CreateFlowFunc:  flowService.Create,
-			GetFlowListFunc: flowService.GetAll,
-			UpdateFlowFunc:  flowService.Update,
+			Selected:    make(map[int]struct{}),
+			FlowService: flowService,
 		},
 		AccountList: accountlist.AccountListModel{
 			Accounts:           d.Accounts,

@@ -30,14 +30,15 @@ var (
 
 func Test_Create(t *testing.T) {
 	resetData()
-	expected := periodicflow.New(testId, "testEdited", decimal.NewFromFloat(111.11), period.Monthly, testTime2)
+	subject.Delete(testId)
+	expected := periodicflow.New(testId, "testCreate", decimal.NewFromFloat(111.11), period.Monthly, testTime2)
 	expectedList := append(slices.Clone(testData.Flows), expected)
 	slices.SortFunc(expectedList, compareFlowId)
-	actual := subject.Create("testEdited", decimal.NewFromFloat(111.11), period.Monthly)
+	actual := subject.Create("testCreate", decimal.NewFromFloat(111.11), period.Monthly)
 	actualList := testData.Flows
 
-	assert.Equal(t, 1, getDataCount, "getDataCount")
-	assert.Equal(t, 1, saveDataCount, "saveDataCount")
+	assert.Equal(t, 2, getDataCount, "getDataCount")
+	assert.Equal(t, 2, saveDataCount, "saveDataCount")
 	assert.Equal(t, *expected, *actual, "not equal object")
 	assert.Equal(t, expectedList, actualList, "not equal object")
 }
@@ -56,7 +57,7 @@ func Test_GetAllSortedByDate(t *testing.T) {
 	resetData()
 	expected := slices.Clone(testData.Flows)
 	slices.SortFunc(expected, compareFlowTime)
-	actual := subject.GetAll()
+	actual := subject.GetAllSortedByDate()
 
 	assert.Equal(t, 1, getDataCount, "getDataCount")
 	assert.Equal(t, 0, saveDataCount, "saveDataCount")
@@ -94,11 +95,11 @@ func resetData() {
 	saveDataCount = 0
 	testData = &data.DataModel{
 		Flows: []*periodicflow.PeriodicFlow{
-			periodicflow.New(uuid.New(), "testA", decimal.NewFromFloat(111.66), period.Weekly, testTime2),
-			periodicflow.New(uuid.New(), "testB", decimal.NewFromFloat(222.66), period.Weekly, testTime2),
+			periodicflow.New(uuid.New(), "testA", decimal.NewFromFloat(111.66), period.Weekly, time.UnixMilli(5000)),
+			periodicflow.New(uuid.New(), "testB", decimal.NewFromFloat(222.66), period.Weekly, time.UnixMilli(4000)),
 			periodicflow.New(testId, "test1", decimal.NewFromFloat(666.66), period.Weekly, testTime),
-			periodicflow.New(uuid.New(), "testC", decimal.NewFromFloat(444.66), period.Weekly, testTime2),
-			periodicflow.New(uuid.New(), "testD", decimal.NewFromFloat(555.66), period.Weekly, testTime2),
+			periodicflow.New(uuid.New(), "testC", decimal.NewFromFloat(444.66), period.Weekly, time.UnixMilli(10000)),
+			periodicflow.New(uuid.New(), "testD", decimal.NewFromFloat(555.66), period.Weekly, time.UnixMilli(1000)),
 		},
 	}
 

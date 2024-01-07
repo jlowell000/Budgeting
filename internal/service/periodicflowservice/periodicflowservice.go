@@ -25,7 +25,8 @@ func (p *PeriodicFlowService) Create(
 	period period.Period,
 ) *periodicflow.PeriodicFlow {
 	d := p.Dataservice.GetData()
-	f := periodicflow.New(p.GetId(), name, amount, period, p.GetTime())
+	newId := p.GetId()
+	f := periodicflow.New(newId, name, amount, period, p.GetTime())
 	d.Flows = append(d.Flows, f)
 	slices.SortFunc(d.Flows, compareFlowId)
 	p.Dataservice.SaveData(d)
@@ -99,5 +100,5 @@ func compareFlowId(a, b *periodicflow.PeriodicFlow) int {
 }
 
 func compareFlowTime(a, b *periodicflow.PeriodicFlow) int {
-	return cmp.Compare(a.Id.String(), b.Id.String())
+	return cmp.Compare(b.UpdatedTimestamp.UnixMilli(), a.UpdatedTimestamp.UnixMilli())
 }
