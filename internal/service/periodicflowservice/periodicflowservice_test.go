@@ -23,8 +23,29 @@ var (
 	subject = PeriodicFlowService{
 		Dataservice: &mockDataService{},
 		GetTime:     func() time.Time { return testTime2 },
+		GetId:       func() uuid.UUID { return testId },
 	}
 )
+
+func Test_CreatePeriodicFlow(t *testing.T) {
+	resetData()
+	expected := periodicflow.New(testId, "testEdited", decimal.NewFromFloat(111.11), period.Monthly, testTime2)
+	actual := subject.CreatePeriodicFlow("testEdited", decimal.NewFromFloat(111.11), period.Monthly)
+
+	assert.Equal(t, 1, getDataCount, "getDataCount")
+	assert.Equal(t, 1, saveDataCount, "saveDataCount")
+	assert.Equal(t, *expected, *actual, "not equal object")
+}
+
+func Test_GetPeriodicFlows(t *testing.T) {
+	resetData()
+	expected := testData.Flows
+	actual := subject.GetPeriodicFlows()
+
+	assert.Equal(t, 1, getDataCount, "getDataCount")
+	assert.Equal(t, 0, saveDataCount, "saveDataCount")
+	assert.Equal(t, expected, actual, "not equal object")
+}
 
 func Test_UpdatePeriodicFlow(t *testing.T) {
 	resetData()

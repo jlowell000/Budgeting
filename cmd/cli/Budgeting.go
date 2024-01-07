@@ -12,8 +12,6 @@ import (
 	"jlowell000.github.io/budgeting/internal/model/account"
 	"jlowell000.github.io/budgeting/internal/model/bookentry"
 	"jlowell000.github.io/budgeting/internal/model/data"
-	"jlowell000.github.io/budgeting/internal/model/period"
-	"jlowell000.github.io/budgeting/internal/model/periodicflow"
 	"jlowell000.github.io/budgeting/internal/service"
 	"jlowell000.github.io/budgeting/internal/service/dataservice"
 	"jlowell000.github.io/budgeting/internal/service/periodicflowservice"
@@ -66,8 +64,8 @@ func initialModel() views.AppModel {
 		FlowList: flowlist.FlowListModel{
 			Flows:           d.Flows,
 			Selected:        make(map[int]struct{}),
-			CreateFlowFunc:  createFlow,
-			GetFlowListFunc: getTestFlows,
+			CreateFlowFunc:  flowService.CreatePeriodicFlow,
+			GetFlowListFunc: flowService.GetPeriodicFlows,
 			UpdateFlowFunc:  flowService.UpdatePeriodicFlow,
 		},
 		AccountList: accountlist.AccountListModel{
@@ -82,22 +80,6 @@ func initialModel() views.AppModel {
 		},
 		SavaDataFunc: func() { d = ds.SaveData(d) },
 	}
-}
-
-//TODO: below is test data to be removed in later issues
-
-func getTestFlows() []*periodicflow.PeriodicFlow {
-	return d.Flows
-}
-
-func createFlow(
-	name string,
-	amount decimal.Decimal,
-	period period.Period,
-) *periodicflow.PeriodicFlow {
-	f := periodicflow.New(uuid.New(), name, amount, period, time.Now())
-	d.Flows = append(d.Flows, f)
-	return f
 }
 
 func getAccounts() []*account.Account {
