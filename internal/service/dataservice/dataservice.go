@@ -3,50 +3,35 @@ package dataservice
 import (
 	"encoding/json"
 	"log"
-	"time"
 
-	"github.com/google/uuid"
-	"jlowell000.github.io/budgeting/internal/io"
-	"jlowell000.github.io/budgeting/internal/model/account"
-	"jlowell000.github.io/budgeting/internal/model/periodicflow"
+	"jlowell000.github.io/budgeting/internal/model/data"
 )
 
-type DataModel struct {
-	Flows    []*periodicflow.PeriodicFlow `json:"flows"`
-	Accounts []*account.Account           `json:"accounts"`
+type DataService struct {
+	Filename    string
+	GetDataJSON func(fileName string) []byte
+	PutDataJSON func(data []byte, fileName string)
+
+	dataModel *data.DataModel
 }
 
-var (
-	getDataJSON = io.ReadFromFile
-	putDataJSON = io.WriteToFile
+func (d *DataService) GetData() *data.DataModel {
+	if d.dataModel == nil {
+		var data data.DataModel
+		fileContents := d.GetDataJSON(d.Filename)
+		json.Unmarshal(fileContents, &data)
+		d.dataModel = &data
+	}
 
-	getNewId = uuid.New
-	getTime  = time.Now
-)
-
-func GetDataFromFile(filename string) *DataModel {
-	var data DataModel
-	fileContents := getDataJSON(filename)
-	json.Unmarshal(fileContents, &data)
-	return &data
+	return d.dataModel
 }
 
-func SaveDataToFile(data *DataModel, filename string) {
-	dataJSON, err := json.Marshal(data)
+func (d *DataService) SaveData(dataModel *data.DataModel) *data.DataModel {
+	d.dataModel = dataModel
+	dataJSON, err := json.Marshal(dataModel)
 	if err != nil {
 		log.Fatal(err)
 	}
-	putDataJSON(dataJSON, filename)
-}
-
-func (d *DataModel) ToJSON() []byte {
-	data, err := json.Marshal(d)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return data
-}
-
-func (d *DataModel) String() string {
-	return string(d.ToJSON())
+	d.PutDataJSON(dataJSON, d.Filename)
+	return d.GetData()
 }

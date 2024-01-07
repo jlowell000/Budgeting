@@ -6,25 +6,23 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	"jlowell000.github.io/budgeting/internal/model/account"
+	"jlowell000.github.io/budgeting/internal/service"
 	"jlowell000.github.io/budgeting/internal/views/form"
 	"jlowell000.github.io/budgeting/internal/views/mainview"
 	"jlowell000.github.io/budgeting/internal/views/util"
 )
 
 type AccountListModel struct {
-	Accounts []*account.Account
 	Choice   int
+	ChoiceId uuid.UUID
 	Cursor   int
 	Selected map[int]struct{}
 	Chosen   bool
 
-	/* Tell the model how to Create a flows */
-	CreateAccountFunc func(string, bool) *account.Account
-	/* Tell the model how to get list of accounts */
-	GetAccountListFunc func() []*account.Account
-	/* Update FlowList */
-	UpdateAccountFunc func(uuid.UUID, string, bool) *account.Account
+	AccountService service.AccountServiceInterface
+	accounts       []*account.Account
 }
 
 type Model interface {
@@ -37,7 +35,7 @@ type Model interface {
 func AccountListUpdate(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 	main := m.GetMain()
 	accountList := m.GetAccountList()
-	accountList.Accounts = accountList.GetAccountListFunc()
+	accountList.accounts = accountList.AccountService.GetAllSortedByDate()
 	form := m.GetForm()
 	checkFormForNewData(accountList, form)
 
@@ -46,12 +44,18 @@ func AccountListUpdate(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "down":
 			accountList.Choice++
-			if accountList.Choice > len(accountList.Accounts)-1 {
-				accountList.Choice = len(accountList.Accounts) - 1
+			if accountList.Choice > len(accountList.accounts)-1 {
+				accountList.Choice = len(accountList.accounts) - 1
 			}
 		case "up":
 			accountList.Choice--
 			if accountList.Choice < 0 {
+				accountList.Choice = 0
+			}
+		case "d":
+			if len(accountList.accounts) > 0 {
+				c := accountList.Choice
+				accountList.AccountService.Delete(accountList.accounts[c].Id)
 				accountList.Choice = 0
 			}
 
@@ -60,9 +64,10 @@ func AccountListUpdate(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 			c := accountList.Choice
 			form.LastScreen = 2
 			form.Inputs = createFormInputs(
-				accountList.Accounts[c].Name,
-				accountList.Accounts[c].Excludable,
+				accountList.accounts[c].Name,
+				accountList.accounts[c].Excludable,
 			)
+			accountList.ChoiceId = accountList.accounts[c].Id
 			main.Choice = 3
 
 		case "n":
@@ -83,14 +88,17 @@ func AccountListUpdate(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 
 func AccountListView(m Model) string {
 	accountList := m.GetAccountList()
+	accountList.accounts = accountList.AccountService.GetAllSortedByDate()
 	c := accountList.Choice
 	// The header
 	tpl := "Viewing Accounts\n\n"
 	tpl += "%s\n\n"
 	tpl += util.Instructions()
+	tpl += util.Dot + util.Subtle("d to delete entry") + util.Dot
+	tpl += util.Dot + util.Subtle("n to create new") + util.Dot
 
 	accounts := ""
-	for i, f := range accountList.Accounts {
+	for i, f := range accountList.accounts {
 		accounts += fmt.Sprintf(
 			"%s\n",
 			util.Checkbox(DisplayString(f), c == i),
@@ -103,8 +111,14 @@ func AccountListView(m Model) string {
 func DisplayString(a *account.Account) string {
 	str := ""
 	if a != nil {
+		var amount string
+		if len(a.Book) > 0 {
+			amount = a.GetLatestBookEntry().Amount.String()
+		} else {
+			amount = decimal.Zero.String()
+		}
 		str += "Name: " + a.Name + util.Dot +
-			"Amount: " + a.GetLatestBookEntry().Amount.String() + util.Dot +
+			"Amount: " + amount + util.Dot +
 			"Updated: " + util.TimeFormat(a.UpdatedTimestamp)
 
 		if a.Excludable {
@@ -155,13 +169,13 @@ func checkFormForNewData(
 ) bool {
 	if form.Submitted {
 		if !accountList.Chosen {
-			accountList.CreateAccountFunc(
+			accountList.AccountService.Create(
 				form.Inputs[0].Value(),
 				form.Inputs[1].Value() == "Y",
 			)
 		} else {
-			accountList.UpdateAccountFunc(
-				accountList.Accounts[accountList.Choice].Id,
+			accountList.AccountService.Update(
+				accountList.accounts[accountList.Choice].Id,
 				form.Inputs[0].Value(),
 				form.Inputs[1].Value() == "Y",
 			)
