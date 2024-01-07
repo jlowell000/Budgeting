@@ -52,6 +52,12 @@ func AccountListUpdate(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 			if accountList.Choice < 0 {
 				accountList.Choice = 0
 			}
+		case "d":
+			if len(accountList.accounts) > 0 {
+				c := accountList.Choice
+				accountList.AccountService.Delete(accountList.accounts[c].Id)
+				accountList.Choice = 0
+			}
 
 		case "e":
 			accountList.Chosen = true
@@ -88,6 +94,8 @@ func AccountListView(m Model) string {
 	tpl := "Viewing Accounts\n\n"
 	tpl += "%s\n\n"
 	tpl += util.Instructions()
+	tpl += util.Dot + util.Subtle("d to delete entry") + util.Dot
+	tpl += util.Dot + util.Subtle("n to create new") + util.Dot
 
 	accounts := ""
 	for i, f := range accountList.accounts {

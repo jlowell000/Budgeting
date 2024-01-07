@@ -56,9 +56,11 @@ func FlowListUpdate(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 			}
 
 		case "d":
-			c := flowList.Choice
-			flowList.FlowService.Delete(flowList.flows[c].Id)
-			flowList.Choice = 0
+			if len(flowList.flows) > 0 {
+				c := flowList.Choice
+				flowList.FlowService.Delete(flowList.flows[c].Id)
+				flowList.Choice = 0
+			}
 		case "n":
 			form.LastScreen = 1
 			form.Inputs = createFormInputs("", decimal.NewFromFloat(0.0), period.Weekly)
