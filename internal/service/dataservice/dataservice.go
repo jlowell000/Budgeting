@@ -3,50 +3,26 @@ package dataservice
 import (
 	"encoding/json"
 	"log"
-	"time"
 
-	"github.com/google/uuid"
-	"jlowell000.github.io/budgeting/internal/io"
-	"jlowell000.github.io/budgeting/internal/model/account"
-	"jlowell000.github.io/budgeting/internal/model/periodicflow"
+	"jlowell000.github.io/budgeting/internal/model/data"
 )
 
-type DataModel struct {
-	Flows    []*periodicflow.PeriodicFlow `json:"flows"`
-	Accounts []*account.Account           `json:"accounts"`
+type DataService struct {
+	GetDataJSON func(fileName string) []byte
+	PutDataJSON func(data []byte, fileName string)
 }
 
-var (
-	getDataJSON = io.ReadFromFile
-	putDataJSON = io.WriteToFile
-
-	getNewId = uuid.New
-	getTime  = time.Now
-)
-
-func GetDataFromFile(filename string) *DataModel {
-	var data DataModel
-	fileContents := getDataJSON(filename)
+func (d *DataService) GetDataFromFile(filename string) *data.DataModel {
+	var data data.DataModel
+	fileContents := d.GetDataJSON(filename)
 	json.Unmarshal(fileContents, &data)
 	return &data
 }
 
-func SaveDataToFile(data *DataModel, filename string) {
+func (d *DataService) SaveDataToFile(data *data.DataModel, filename string) {
 	dataJSON, err := json.Marshal(data)
 	if err != nil {
 		log.Fatal(err)
 	}
-	putDataJSON(dataJSON, filename)
-}
-
-func (d *DataModel) ToJSON() []byte {
-	data, err := json.Marshal(d)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return data
-}
-
-func (d *DataModel) String() string {
-	return string(d.ToJSON())
+	d.PutDataJSON(dataJSON, filename)
 }

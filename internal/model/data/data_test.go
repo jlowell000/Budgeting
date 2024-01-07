@@ -1,4 +1,4 @@
-package dataservice
+package data
 
 import (
 	"encoding/json"
@@ -12,46 +12,25 @@ import (
 	"github.com/stretchr/testify/assert"
 	"jlowell000.github.io/budgeting/internal/model/account"
 	"jlowell000.github.io/budgeting/internal/model/bookentry"
-	"jlowell000.github.io/budgeting/internal/model/data"
 	"jlowell000.github.io/budgeting/internal/model/period"
 	"jlowell000.github.io/budgeting/internal/model/periodicflow"
 )
 
-const (
-	TEST_FILE_NAME = "test.json"
-	TEST_ID        = "16cfd708-db6d-42fd-8ad1-55316690520c"
-	TEST_TIME      = "2006-01-23T15:04:05Z"
-)
-
-var (
-	getDataJSONCount int = 0
-	putDataJSONCount int = 0
-	putDataJSONValue string
-	subject          DataService
-)
-
-func TestGetDataFromFile(t *testing.T) {
+func Test_FromJSON(t *testing.T) {
 	expected := testData()
-	setUpMocking(t, expected)
-	actual := subject.GetDataFromFile(TEST_FILE_NAME)
+	actual := FromJSON([]byte(makaDataJSON(expected)))
 
 	assert.Equal(t, expected.ToJSON(), actual.ToJSON())
-	assert.Equal(t, 1, getDataJSONCount, "getDataJSON")
-	assert.Equal(t, 0, putDataJSONCount, "putDataJSONCount")
 }
 
-func TestSaveEntryListToFile(t *testing.T) {
+func Test_ToJson(t *testing.T) {
 	expected := testData()
-	setUpMocking(t, expected)
-	subject.SaveDataToFile(expected, TEST_FILE_NAME)
-
-	assert.Equal(t, 0, getDataJSONCount, "getDataJSONCount")
-	assert.Equal(t, 1, putDataJSONCount, "putDataJSONCount")
-	assert.Equal(t, makaDataJSON(expected), putDataJSONValue, "putDataJSONCount")
+	actual := string(expected.ToJSON())
+	assert.Equal(t, makaDataJSON(expected), actual, "ToJSON")
 }
 
-func testData() *data.DataModel {
-	return &data.DataModel{
+func testData() *DataModel {
+	return &DataModel{
 		Flows: []*periodicflow.PeriodicFlow{
 			periodicflow.New(uuid.New(), "1", decimal.NewFromFloat(666.66), period.Weekly, time.Now()),
 			periodicflow.New(uuid.New(), "2", decimal.NewFromFloat(123.66), period.Weekly, time.Now()),
@@ -60,43 +39,6 @@ func testData() *data.DataModel {
 		},
 		Accounts: createTestAccounts(),
 	}
-}
-
-func setUpMocking(t *testing.T, data *data.DataModel) {
-	subject = DataService{
-		GetDataJSON: func(fileName string) []byte {
-			getDataJSONCount++
-			return data.ToJSON()
-		},
-		PutDataJSON: func(data []byte, fileName string) {
-			putDataJSONCount++
-			putDataJSONValue = string(data)
-			return
-		},
-	}
-	getDataJSONCount = 0
-	putDataJSONCount = 0
-	putDataJSONValue = ""
-}
-
-func createTestFlow() []*periodicflow.PeriodicFlow {
-	testSize := 1
-	testSizeSlice := make([]int, testSize)
-	var flows []*periodicflow.PeriodicFlow
-	for i := range testSizeSlice {
-		testSizeSlice[i] = i
-		flows = append(
-			flows,
-			periodicflow.New(
-				uuid.New(),
-				"flow_"+fmt.Sprint(i),
-				decimal.NewFromFloat(111.11).Mul(decimal.NewFromInt(int64(i))),
-				period.Weekly,
-				time.Now(),
-			),
-		)
-	}
-	return flows
 }
 
 func createTestAccounts() []*account.Account {
@@ -137,7 +79,7 @@ func createAccount(name string, excludable bool) *account.Account {
 }
 
 func makaDataJSON(
-	d *data.DataModel,
+	d *DataModel,
 ) string {
 	var flowsPlaceHolder string
 	for i, f := range d.Flows {

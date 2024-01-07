@@ -8,10 +8,13 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
+	"jlowell000.github.io/budgeting/internal/io"
 	"jlowell000.github.io/budgeting/internal/model/account"
 	"jlowell000.github.io/budgeting/internal/model/bookentry"
+	"jlowell000.github.io/budgeting/internal/model/data"
 	"jlowell000.github.io/budgeting/internal/model/period"
 	"jlowell000.github.io/budgeting/internal/model/periodicflow"
+	"jlowell000.github.io/budgeting/internal/service"
 	"jlowell000.github.io/budgeting/internal/service/dataservice"
 
 	"jlowell000.github.io/budgeting/internal/views"
@@ -31,7 +34,11 @@ const (
 )
 
 var (
-	data *dataservice.DataModel
+	d  *data.DataModel
+	ds service.DataserviceInterface = &dataservice.DataService{
+		GetDataJSON: io.ReadFromFile,
+		PutDataJSON: io.WriteToFile,
+	}
 )
 
 func main() {
@@ -43,7 +50,7 @@ func main() {
 }
 
 func initialModel() views.AppModel {
-	data = dataservice.GetDataFromFile(ENTRYLIST_FILENAME)
+	d = ds.GetDataFromFile(ENTRYLIST_FILENAME)
 
 	return views.AppModel{
 		Main: mainview.MainModel{
@@ -51,14 +58,14 @@ func initialModel() views.AppModel {
 			Selected: make(map[int]struct{}),
 		},
 		FlowList: flowlist.FlowListModel{
-			Flows:           data.Flows,
+			Flows:           d.Flows,
 			Selected:        make(map[int]struct{}),
 			CreateFlowFunc:  createFlow,
 			GetFlowListFunc: getTestFlows,
 			UpdateFlowFunc:  updateTestFlow,
 		},
 		AccountList: accountlist.AccountListModel{
-			Accounts:           data.Accounts,
+			Accounts:           d.Accounts,
 			Selected:           make(map[int]struct{}),
 			CreateAccountFunc:  createAccount,
 			GetAccountListFunc: getAccounts,
@@ -67,14 +74,14 @@ func initialModel() views.AppModel {
 		Account: accountview.AccountModel{
 			AddEntry: addBookEntry,
 		},
-		SavaDataFunc: func() { dataservice.SaveDataToFile(data, ENTRYLIST_FILENAME) },
+		SavaDataFunc: func() { ds.SaveDataToFile(d, ENTRYLIST_FILENAME) },
 	}
 }
 
 //TODO: below is test data to be removed in later issues
 
 func getTestFlows() []*periodicflow.PeriodicFlow {
-	return data.Flows
+	return d.Flows
 }
 
 func createFlow(
@@ -83,7 +90,7 @@ func createFlow(
 	period period.Period,
 ) *periodicflow.PeriodicFlow {
 	f := periodicflow.New(uuid.New(), name, amount, period, time.Now())
-	data.Flows = append(data.Flows, f)
+	d.Flows = append(d.Flows, f)
 	return f
 }
 
@@ -93,22 +100,22 @@ func updateTestFlow(
 	amount decimal.Decimal,
 	period period.Period,
 ) *periodicflow.PeriodicFlow {
-	for i, f := range data.Flows {
+	for i, f := range d.Flows {
 		if f.Id == id {
-			data.Flows[i] = f.Update(
+			d.Flows[i] = f.Update(
 				name,
 				amount,
 				period,
 				time.Now(),
 			)
-			return data.Flows[i]
+			return d.Flows[i]
 		}
 	}
 	return nil
 }
 
 func getAccounts() []*account.Account {
-	return data.Accounts
+	return d.Accounts
 }
 
 func createAccount(name string, excludable bool) *account.Account {
@@ -118,7 +125,7 @@ func createAccount(name string, excludable bool) *account.Account {
 		excludable,
 		time.Now(),
 	)
-	data.Accounts = append(data.Accounts, a)
+	d.Accounts = append(d.Accounts, a)
 	return a
 }
 
@@ -127,9 +134,9 @@ func updateAccount(
 	name string,
 	excludable bool,
 ) *account.Account {
-	for i, f := range data.Accounts {
+	for i, f := range d.Accounts {
 		if f.Id == id {
-			data.Accounts[i] = f.Update(
+			d.Accounts[i] = f.Update(
 				name,
 				excludable,
 				time.Now(),
