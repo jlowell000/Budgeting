@@ -22,6 +22,9 @@ type PeriodicFlowServiceInterface interface {
 	GetTotalWeeklyInflow() decimal.Decimal
 	GetTotalWeeklyOutflow() decimal.Decimal
 	GetTotalWeeklyFlow() decimal.Decimal
+	GetProjectedTotalInflow(amount decimal.Decimal, period period.Period) decimal.Decimal
+	GetProjectedTotalOutflow(amount decimal.Decimal, period period.Period) decimal.Decimal
+	GetProjectedTotalFlow(amount decimal.Decimal, period period.Period) decimal.Decimal
 	Update(id uuid.UUID, name string, amount decimal.Decimal, period period.Period) *periodicflow.PeriodicFlow
 	Delete(id uuid.UUID)
 }
