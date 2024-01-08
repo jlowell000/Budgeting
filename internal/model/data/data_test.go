@@ -112,7 +112,7 @@ func makeFlowJSON(
 		"\"name\":\"" + p.Name + "\"," +
 		"\"amount\":\"" + p.Amount.String() + "\"," +
 		"\"period\":\"" + p.Period.String() + "\"," +
-		"\"weekly_amount\":\"" + p.WeeklyAmount.String() + "\"," +
+		"\"monthly_amount\":\"" + p.MonthlyAmount.String() + "\"," +
 		"\"updated_timestamp\":" + makeTimeStampJSON(p.UpdatedTimestamp) +
 		"}"
 }

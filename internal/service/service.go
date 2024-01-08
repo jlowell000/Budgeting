@@ -19,6 +19,12 @@ type PeriodicFlowServiceInterface interface {
 	Get(id uuid.UUID) *periodicflow.PeriodicFlow
 	GetAll() []*periodicflow.PeriodicFlow
 	GetAllSortedByDate() []*periodicflow.PeriodicFlow
+	GetTotalMonthlyInflow() decimal.Decimal
+	GetTotalMonthlyOutflow() decimal.Decimal
+	GetTotalMonthlyFlow() decimal.Decimal
+	GetProjectedTotalInflow(amount decimal.Decimal, period period.Period) decimal.Decimal
+	GetProjectedTotalOutflow(amount decimal.Decimal, period period.Period) decimal.Decimal
+	GetProjectedTotalFlow(amount decimal.Decimal, period period.Period) decimal.Decimal
 	Update(id uuid.UUID, name string, amount decimal.Decimal, period period.Period) *periodicflow.PeriodicFlow
 	Delete(id uuid.UUID)
 }
@@ -28,6 +34,7 @@ type AccountServiceInterface interface {
 	Get(id uuid.UUID) *account.Account
 	GetAll() []*account.Account
 	GetAllSortedByDate() []*account.Account
+	GetTotal(exclude bool) decimal.Decimal
 	Update(id uuid.UUID, name string, excludable bool) *account.Account
 	AddBookEntry(id uuid.UUID, amount decimal.Decimal) *account.Account
 	Delete(id uuid.UUID)

@@ -7,13 +7,15 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/termenv"
 	"github.com/shopspring/decimal"
+	"jlowell000.github.io/budgeting/internal/model/period"
+	"jlowell000.github.io/budgeting/internal/service"
 )
 
 var (
 	Term    = termenv.EnvColorProfile()
 	Keyword = makeFgStyle("211")
 	Subtle  = makeFgStyle("241")
-	Dot     = ColorFg(" • ", "236")
+	Dot     = " • " //ColorFg(" • ", "236")
 
 	FocusedStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
 	BlurredStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
@@ -32,6 +34,21 @@ func Instructions() string {
 		Subtle("b: previous screen") + Dot +
 		Subtle("s: save data") + Dot +
 		Subtle("q, esc: quit")
+}
+
+func ProjectionString(accountService service.AccountServiceInterface, flowService service.PeriodicFlowServiceInterface) string {
+	inflow := flowService.GetTotalMonthlyInflow()
+	outflow := flowService.GetTotalMonthlyOutflow()
+	totalflow := flowService.GetTotalMonthlyFlow()
+	projection := flowService.GetProjectedTotalFlow(decimal.NewFromInt(6), period.Monthly)
+	accountsTotal := accountService.GetTotal(true)
+
+	return "\nTotal Inflows: " + inflow.String() + Dot +
+		"Total Outflows: " + outflow.String() + Dot +
+		"Total Flows: " + totalflow.String() + "\n" +
+		"Accounts Total: " + accountsTotal.String() + "\n" +
+		"6 Month Projected Change: " + projection.String() + Dot +
+		"6 Month Projected Change: " + accountsTotal.Add(projection).String() + "\n\n"
 }
 
 func Checkbox(label string, checked bool) string {

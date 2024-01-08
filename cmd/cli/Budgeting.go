@@ -62,16 +62,20 @@ func initialModel() views.AppModel {
 
 	return views.AppModel{
 		Main: mainview.MainModel{
-			Choice:   1,
-			Selected: make(map[int]struct{}),
+			Choice:         1,
+			Selected:       make(map[int]struct{}),
+			AccountService: accountService,
+			FlowService:    flowService,
 		},
 		FlowList: flowlist.FlowListModel{
-			Selected:    make(map[int]struct{}),
-			FlowService: flowService,
+			Selected:       make(map[int]struct{}),
+			AccountService: accountService,
+			FlowService:    flowService,
 		},
 		AccountList: accountlist.AccountListModel{
 			Selected:       make(map[int]struct{}),
 			AccountService: accountService,
+			FlowService:    flowService,
 		},
 		Account: accountview.AccountModel{
 			AccountService: accountService,

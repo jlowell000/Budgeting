@@ -51,6 +51,42 @@ func (p *PeriodicFlowService) GetAllSortedByDate() []*periodicflow.PeriodicFlow 
 	return f
 }
 
+func (p *PeriodicFlowService) GetTotalMonthlyInflow() decimal.Decimal {
+	return periodicflow.Sum(getPositiveFlows(p.Dataservice.GetData().Flows))
+}
+
+func (p *PeriodicFlowService) GetTotalMonthlyOutflow() decimal.Decimal {
+	return periodicflow.Sum(getNegativeFlows(p.Dataservice.GetData().Flows))
+}
+
+func (p *PeriodicFlowService) GetTotalMonthlyFlow() decimal.Decimal {
+	return periodicflow.Sum(p.Dataservice.GetData().Flows)
+}
+
+func (p *PeriodicFlowService) GetProjectedTotalInflow(amount decimal.Decimal, period period.Period) decimal.Decimal {
+	return periodicflow.ProjectedChange(
+		getPositiveFlows(p.Dataservice.GetData().Flows),
+		amount,
+		period,
+	)
+}
+
+func (p *PeriodicFlowService) GetProjectedTotalOutflow(amount decimal.Decimal, period period.Period) decimal.Decimal {
+	return periodicflow.ProjectedChange(
+		getNegativeFlows(p.Dataservice.GetData().Flows),
+		amount,
+		period,
+	)
+}
+
+func (p *PeriodicFlowService) GetProjectedTotalFlow(amount decimal.Decimal, period period.Period) decimal.Decimal {
+	return periodicflow.ProjectedChange(
+		p.Dataservice.GetData().Flows,
+		amount,
+		period,
+	)
+}
+
 func (p *PeriodicFlowService) Update(
 	id uuid.UUID,
 	name string,
@@ -93,4 +129,27 @@ func compareFlowId(a, b *periodicflow.PeriodicFlow) int {
 
 func compareFlowTime(a, b *periodicflow.PeriodicFlow) int {
 	return cmp.Compare(b.UpdatedTimestamp.UnixMilli(), a.UpdatedTimestamp.UnixMilli())
+}
+
+func getPositiveFlows(flows []*periodicflow.PeriodicFlow) []*periodicflow.PeriodicFlow {
+	return filterFlows(
+		slices.Clone(flows),
+		func(pf *periodicflow.PeriodicFlow) bool { return pf.Amount.GreaterThan(decimal.Zero) },
+	)
+}
+
+func getNegativeFlows(flows []*periodicflow.PeriodicFlow) []*periodicflow.PeriodicFlow {
+	return filterFlows(
+		slices.Clone(flows),
+		func(pf *periodicflow.PeriodicFlow) bool { return pf.Amount.LessThan(decimal.Zero) },
+	)
+}
+
+func filterFlows(flows []*periodicflow.PeriodicFlow, test func(*periodicflow.PeriodicFlow) bool) (output []*periodicflow.PeriodicFlow) {
+	for _, f := range flows {
+		if test(f) {
+			output = append(output, f)
+		}
+	}
+	return
 }

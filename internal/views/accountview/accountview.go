@@ -58,6 +58,7 @@ func AccountView(m Model) string {
 	// The header
 	tpl := "Viewing Accounts\n\n"
 	tpl += fmt.Sprintf("%s\n\n", accountlist.DisplayString(account))
+	tpl += "\nId: " + account.Id.String() + "\n"
 	tpl += "%s\n\n"
 	tpl += util.Instructions()
 

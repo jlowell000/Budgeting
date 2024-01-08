@@ -38,11 +38,10 @@ func TestPeriodFromJSON_no_data_defaults_to_unknown(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
-func TestPeriodicFlowToJSON(t *testing.T) {
+func Test_MonthlyAmount(t *testing.T) {
 	for _, p := range Periods {
-		expected := periodWeekContract(p)
-		actual := p.WeeklyAmount()
-
+		expected := periodMonthContract(p)
+		actual := p.MonthlyAmount()
 		assert.Equal(t, expected, actual)
 	}
 }
@@ -57,19 +56,19 @@ func TestPeriodStrings(t *testing.T) {
 	}
 }
 
-func periodWeekContract(p Period) decimal.Decimal {
+func periodMonthContract(p Period) decimal.Decimal {
 	switch p {
 	default:
-		return decimal.NewFromInt(0)
-	case Unknown:
-		return decimal.NewFromInt(0)
-	case Daily:
-		return decimal.NewFromFloat(1 / 7)
-	case Weekly:
 		return decimal.NewFromInt(1)
+	case Unknown:
+		return decimal.NewFromInt(1)
+	case Daily:
+		return decimal.NewFromInt(30)
+	case Weekly:
+		return decimal.NewFromInt(4)
 	case Monthly:
-		return decimal.NewFromFloat(52 / 12)
+		return decimal.NewFromInt(1)
 	case Yearly:
-		return decimal.NewFromInt(52)
+		return decimal.NewFromInt(1).Div(decimal.NewFromInt(12))
 	}
 }

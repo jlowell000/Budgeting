@@ -52,6 +52,14 @@ func (a *AccountService) GetAllSortedByDate() []*account.Account {
 	return l
 }
 
+func (a *AccountService) GetTotal(exclude bool) decimal.Decimal {
+	if exclude {
+		return account.SumExclusion(a.Dataservice.GetData().Accounts)
+	} else {
+		return account.Sum(a.Dataservice.GetData().Accounts)
+	}
+}
+
 func (a *AccountService) Update(id uuid.UUID, name string, excludable bool) *account.Account {
 	a.Get(id).Update(
 		name,
@@ -102,4 +110,13 @@ func compareAccountId(a, b *account.Account) int {
 
 func compareAccountTime(a, b *account.Account) int {
 	return cmp.Compare(b.UpdatedTimestamp.UnixMilli(), a.UpdatedTimestamp.UnixMilli())
+}
+
+func filterAccounts(accounts []*account.Account, test func(*account.Account) bool) (output []*account.Account) {
+	for _, a := range accounts {
+		if test(a) {
+			output = append(output, a)
+		}
+	}
+	return
 }

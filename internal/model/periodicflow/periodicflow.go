@@ -19,7 +19,7 @@ type PeriodicFlow struct {
 	Name             string          `json:"name,omitempty"`
 	Amount           decimal.Decimal `json:"amount,omitempty"`
 	Period           period.Period   `json:"period"`
-	WeeklyAmount     decimal.Decimal `json:"weekly_amount,omitempty"`
+	MonthlyAmount    decimal.Decimal `json:"monthly_amount,omitempty"`
 	UpdatedTimestamp time.Time       `json:"updated_timestamp,omitempty"`
 }
 
@@ -38,7 +38,7 @@ func New(
 		Name:             name,
 		Amount:           amount,
 		Period:           period,
-		WeeklyAmount:     amount.Mul(period.WeeklyAmount()),
+		MonthlyAmount:    amount.Mul(period.MonthlyAmount()),
 		UpdatedTimestamp: createTime,
 	}
 }
@@ -52,7 +52,7 @@ func (f *PeriodicFlow) Update(
 	f.Name = name
 	f.Amount = amount
 	f.Period = period
-	f.WeeklyAmount = f.Amount.Mul(f.Period.WeeklyAmount())
+	f.MonthlyAmount = f.Amount.Mul(f.Period.MonthlyAmount())
 	f.UpdatedTimestamp = updateTime
 	return f
 }
@@ -80,10 +80,10 @@ func FromJSON(data []byte) PeriodicFlow {
 /*
 Sum the given Periodic Flows' weekly amounts
 */
-func Sum(flows []PeriodicFlow) decimal.Decimal {
+func Sum(flows []*PeriodicFlow) decimal.Decimal {
 	sum := decimal.NewFromInt(0)
 	for _, f := range flows {
-		sum = sum.Add(f.WeeklyAmount)
+		sum = sum.Add(f.MonthlyAmount)
 	}
 	return sum
 }
@@ -92,11 +92,11 @@ func Sum(flows []PeriodicFlow) decimal.Decimal {
 Calculate projected change over time
 */
 func ProjectedChange(
-	flows []PeriodicFlow,
+	flows []*PeriodicFlow,
 	amount decimal.Decimal,
 	period period.Period,
 ) decimal.Decimal {
-	return Sum(flows).Mul(period.WeeklyAmount()).Mul(amount)
+	return Sum(flows).DivRound(period.MonthlyAmount(), 6).Mul(amount)
 }
 
 func (p *PeriodicFlow) String() string {
