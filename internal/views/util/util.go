@@ -15,7 +15,7 @@ var (
 	Term    = termenv.EnvColorProfile()
 	Keyword = makeFgStyle("211")
 	Subtle  = makeFgStyle("241")
-	Dot     = ColorFg(" • ", "236")
+	Dot     = " • " //ColorFg(" • ", "236")
 
 	FocusedStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
 	BlurredStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
