@@ -41,6 +41,7 @@ func AccountListUpdate(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
+		c := accountList.Choice
 		switch msg.String() {
 		case "down":
 			accountList.Choice++
@@ -54,14 +55,12 @@ func AccountListUpdate(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 			}
 		case "d":
 			if len(accountList.accounts) > 0 {
-				c := accountList.Choice
 				accountList.AccountService.Delete(accountList.accounts[c].Id)
 				accountList.Choice = 0
 			}
 
 		case "e":
 			accountList.Chosen = true
-			c := accountList.Choice
 			form.LastScreen = 2
 			form.Inputs = createFormInputs(
 				accountList.accounts[c].Name,
@@ -79,6 +78,7 @@ func AccountListUpdate(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 			main.Chosen = false
 		case "enter":
 			accountList.Chosen = true
+			accountList.ChoiceId = accountList.accounts[c].Id
 			main.Choice = 4
 		}
 	}
@@ -89,9 +89,11 @@ func AccountListUpdate(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 func AccountListView(m Model) string {
 	accountList := m.GetAccountList()
 	accountList.accounts = accountList.AccountService.GetAllSortedByDate()
+	total := accountList.AccountService.GetTotal(true)
 	c := accountList.Choice
 	// The header
 	tpl := "Viewing Accounts\n\n"
+	tpl += "Total Account Values (Excluded not included): " + total.String() + "\n\n"
 	tpl += "%s\n\n"
 	tpl += util.Instructions()
 	tpl += util.Dot + util.Subtle("d to delete entry") + util.Dot

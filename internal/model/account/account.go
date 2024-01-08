@@ -67,7 +67,7 @@ func FromJSON(data []byte) Account {
 Sum the given Accounts' amounts
 */
 func Sum(accounts []*Account) decimal.Decimal {
-	sum := decimal.NewFromInt(0)
+	sum := decimal.Zero
 	for _, a := range accounts {
 		sum = sum.Add(a.GetLatestBookEntry().Amount)
 	}
@@ -78,9 +78,9 @@ func Sum(accounts []*Account) decimal.Decimal {
 Sum the given Accounts' amounts excludes all Excludable accounts
 */
 func SumExclusion(accounts []*Account) decimal.Decimal {
-	sum := decimal.NewFromInt(0)
+	sum := decimal.Zero
 	for _, a := range accounts {
-		if !a.Excludable {
+		if !a.Excludable && len(a.Book) > 0 {
 			sum = sum.Add(a.GetLatestBookEntry().Amount)
 		}
 	}
