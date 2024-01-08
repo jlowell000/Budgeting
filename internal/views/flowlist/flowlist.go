@@ -23,8 +23,9 @@ type FlowListModel struct {
 	Selected map[int]struct{}
 	Chosen   bool
 
-	FlowService service.PeriodicFlowServiceInterface
-	flows       []*periodicflow.PeriodicFlow
+	AccountService service.AccountServiceInterface
+	FlowService    service.PeriodicFlowServiceInterface
+	flows          []*periodicflow.PeriodicFlow
 }
 
 type Model interface {
@@ -86,16 +87,12 @@ func FlowListUpdate(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 func FlowListView(m Model) string {
 	flowList := m.GetFlowList()
 	flowList.flows = flowList.FlowService.GetAllSortedByDate()
-	inflow := flowList.FlowService.GetTotalWeeklyInflow()
-	outflow := flowList.FlowService.GetTotalWeeklyOutflow()
-	totalflow := flowList.FlowService.GetTotalWeeklyFlow()
+
 	c := flowList.Choice
 	// The header
 	tpl := "Viewing Periodic Flows\n\n"
 
-	tpl += "Total Inflows: " + inflow.String() + util.Dot
-	tpl += "Total Outflows: " + outflow.String() + util.Dot
-	tpl += "Total Flows: " + totalflow.String() + "\n\n"
+	tpl += util.ProjectionString(flowList.AccountService, flowList.FlowService)
 	tpl += "%s\n\n"
 	tpl += util.Instructions()
 	tpl += util.Dot + util.Subtle("d to delete entry") + util.Dot
@@ -118,6 +115,7 @@ func displayString(f *periodicflow.PeriodicFlow) string {
 		str += "Name: " + f.Name + util.Dot +
 			"Amount: " + f.Amount.String() + util.Dot +
 			"Period: " + f.Period.String() + util.Dot +
+			"Weekly Amount: " + f.WeeklyAmount.String() + util.Dot +
 			"Updated: " + util.TimeFormat(f.UpdatedTimestamp)
 	}
 	return str

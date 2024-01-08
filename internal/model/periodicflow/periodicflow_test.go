@@ -1,6 +1,7 @@
 package periodicflow
 
 import (
+	"fmt"
 	"log"
 	"testing"
 	"time"
@@ -96,7 +97,7 @@ func TestPeriodicFlowFConstructor_properly_sets_weekly_amount(t *testing.T) {
 			Name:             TEST_NAME,
 			Amount:           TEST_AMOUNT,
 			Period:           p,
-			WeeklyAmount:     TEST_AMOUNT.Mul(p.WeeklyAmount()),
+			WeeklyAmount:     TEST_AMOUNT.Div(p.WeeklyAmount()),
 			UpdatedTimestamp: timestamp,
 		}
 		actual := *New(id, TEST_NAME, TEST_AMOUNT, p, timestamp)
@@ -112,7 +113,7 @@ func TestPeriodicFlow_Sum_different_periods(t *testing.T) {
 	var expected decimal.Decimal
 	var flows []*PeriodicFlow
 	for _, p := range period.Periods {
-		expected = expected.Add(TEST_AMOUNT.Mul(p.WeeklyAmount()))
+		expected = expected.Add(TEST_AMOUNT.Div(p.WeeklyAmount()))
 		flows = append(flows, New(id, TEST_NAME, TEST_AMOUNT, p, timestamp))
 	}
 	actual := Sum(flows)
@@ -128,11 +129,12 @@ func TestPeriodicFlow_Projected_change_different_periods(t *testing.T) {
 	var expected decimal.Decimal
 	var flows []*PeriodicFlow
 	for _, p := range period.Periods {
-		expected = expected.Add(TEST_AMOUNT.Mul(p.WeeklyAmount()))
+		expected = expected.Add(TEST_AMOUNT.Div(p.WeeklyAmount()))
 		flows = append(flows, New(id, TEST_NAME, TEST_AMOUNT, p, timestamp))
 	}
 	expected = expected.Mul(projectAmount).Mul(projectPeriod.WeeklyAmount())
 	actual := ProjectedChange(flows, projectAmount, projectPeriod)
+	fmt.Printf("expected: %s, actual: %s", expected.String(), actual.String())
 	assert.Equal(t, expected, actual)
 }
 

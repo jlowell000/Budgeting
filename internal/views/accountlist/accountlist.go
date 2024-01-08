@@ -22,6 +22,7 @@ type AccountListModel struct {
 	Chosen   bool
 
 	AccountService service.AccountServiceInterface
+	FlowService    service.PeriodicFlowServiceInterface
 	accounts       []*account.Account
 }
 
@@ -89,11 +90,10 @@ func AccountListUpdate(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 func AccountListView(m Model) string {
 	accountList := m.GetAccountList()
 	accountList.accounts = accountList.AccountService.GetAllSortedByDate()
-	total := accountList.AccountService.GetTotal(true)
 	c := accountList.Choice
 	// The header
 	tpl := "Viewing Accounts\n\n"
-	tpl += "Total Account Values (Excluded not included): " + total.String() + "\n\n"
+	tpl += util.ProjectionString(accountList.AccountService, accountList.FlowService)
 	tpl += "%s\n\n"
 	tpl += util.Instructions()
 	tpl += util.Dot + util.Subtle("d to delete entry") + util.Dot

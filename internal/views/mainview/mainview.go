@@ -4,14 +4,17 @@ import (
 	"fmt"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"jlowell000.github.io/budgeting/internal/service"
 	"jlowell000.github.io/budgeting/internal/views/util"
 )
 
 type MainModel struct {
-	Choice   int
-	Cursor   int
-	Selected map[int]struct{}
-	Chosen   bool
+	Choice         int
+	Cursor         int
+	Selected       map[int]struct{}
+	Chosen         bool
+	AccountService service.AccountServiceInterface
+	FlowService    service.PeriodicFlowServiceInterface
 }
 
 var mainChoises = []string{
@@ -57,6 +60,7 @@ func MainView(m Model) string {
 	c := main.Choice
 
 	tpl := "What to do?\n\n"
+	tpl += util.ProjectionString(main.AccountService, main.FlowService)
 	tpl += "%s\n\n"
 	tpl += util.Instructions()
 	choices := ""

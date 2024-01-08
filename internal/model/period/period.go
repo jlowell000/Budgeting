@@ -78,15 +78,15 @@ Get the Period for a given string.
 func (p *Period) WeeklyAmount() decimal.Decimal {
 	switch *p {
 	default:
-		return decimal.NewFromInt(0)
+		return decimal.NewFromInt(1)
 	case Unknown:
-		return decimal.NewFromInt(0)
+		return decimal.NewFromInt(1)
 	case Daily:
-		return decimal.NewFromFloat(1 / 7)
+		return decimal.NewFromInt(1).Div(decimal.NewFromInt(7))
 	case Weekly:
 		return decimal.NewFromInt(1)
 	case Monthly:
-		return decimal.NewFromFloat(52 / 12)
+		return decimal.NewFromInt(52).Div(decimal.NewFromInt(12))
 	case Yearly:
 		return decimal.NewFromInt(52)
 	}

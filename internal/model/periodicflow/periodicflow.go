@@ -38,7 +38,7 @@ func New(
 		Name:             name,
 		Amount:           amount,
 		Period:           period,
-		WeeklyAmount:     amount.Mul(period.WeeklyAmount()),
+		WeeklyAmount:     amount.Div(period.WeeklyAmount()),
 		UpdatedTimestamp: createTime,
 	}
 }
@@ -52,7 +52,7 @@ func (f *PeriodicFlow) Update(
 	f.Name = name
 	f.Amount = amount
 	f.Period = period
-	f.WeeklyAmount = f.Amount.Mul(f.Period.WeeklyAmount())
+	f.WeeklyAmount = f.Amount.Div(f.Period.WeeklyAmount())
 	f.UpdatedTimestamp = updateTime
 	return f
 }
