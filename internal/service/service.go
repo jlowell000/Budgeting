@@ -31,6 +31,7 @@ type AccountServiceInterface interface {
 	Get(id uuid.UUID) *account.Account
 	GetAll() []*account.Account
 	GetAllSortedByDate() []*account.Account
+	GetTotal(exclude bool) decimal.Decimal
 	Update(id uuid.UUID, name string, excludable bool) *account.Account
 	AddBookEntry(id uuid.UUID, amount decimal.Decimal) *account.Account
 	Delete(id uuid.UUID)

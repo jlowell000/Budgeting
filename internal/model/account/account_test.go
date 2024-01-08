@@ -285,7 +285,7 @@ func Test_Sum_accounts(t *testing.T) {
 	amount := decimal.NewFromFloat(666.66)
 	testSize := 100
 	testSizeSlice := make([]int, testSize)
-	var accounts []Account
+	var accounts []*Account
 	for i := range testSizeSlice {
 		testSizeSlice[i] = i
 		accounts = append(accounts, createAccount(amount, false))
@@ -300,7 +300,7 @@ func Test_SumExclusion_accounts(t *testing.T) {
 	amount := decimal.NewFromFloat(666.66)
 	testSize := 100
 	testSizeSlice := make([]int, testSize)
-	var accounts []Account
+	var accounts []*Account
 	for i := range testSizeSlice {
 		testSizeSlice[i] = i
 		third := i%4 == 0
@@ -342,8 +342,8 @@ func Test_Update(t *testing.T) {
 	assert.Equal(t, *expected, *actual)
 }
 
-func createAccount(amount decimal.Decimal, excludable bool) Account {
-	return Account{
+func createAccount(amount decimal.Decimal, excludable bool) *Account {
+	return &Account{
 		Id:         uuid.New(),
 		Excludable: excludable,
 		Book: []*bookentry.BookEntry{
