@@ -37,9 +37,9 @@ func Instructions() string {
 }
 
 func ProjectionString(accountService service.AccountServiceInterface, flowService service.PeriodicFlowServiceInterface) string {
-	inflow := flowService.GetTotalWeeklyInflow()
-	outflow := flowService.GetTotalWeeklyOutflow()
-	totalflow := flowService.GetTotalWeeklyFlow()
+	inflow := flowService.GetTotalMonthlyInflow()
+	outflow := flowService.GetTotalMonthlyOutflow()
+	totalflow := flowService.GetTotalMonthlyFlow()
 	projection := flowService.GetProjectedTotalFlow(decimal.NewFromInt(6), period.Monthly)
 	accountsTotal := accountService.GetTotal(true)
 

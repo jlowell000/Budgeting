@@ -19,9 +19,9 @@ type PeriodicFlowServiceInterface interface {
 	Get(id uuid.UUID) *periodicflow.PeriodicFlow
 	GetAll() []*periodicflow.PeriodicFlow
 	GetAllSortedByDate() []*periodicflow.PeriodicFlow
-	GetTotalWeeklyInflow() decimal.Decimal
-	GetTotalWeeklyOutflow() decimal.Decimal
-	GetTotalWeeklyFlow() decimal.Decimal
+	GetTotalMonthlyInflow() decimal.Decimal
+	GetTotalMonthlyOutflow() decimal.Decimal
+	GetTotalMonthlyFlow() decimal.Decimal
 	GetProjectedTotalInflow(amount decimal.Decimal, period period.Period) decimal.Decimal
 	GetProjectedTotalOutflow(amount decimal.Decimal, period period.Period) decimal.Decimal
 	GetProjectedTotalFlow(amount decimal.Decimal, period period.Period) decimal.Decimal

@@ -64,27 +64,27 @@ func Test_GetAllSortedByDate(t *testing.T) {
 	assert.Equal(t, expected, actual, "not equal object")
 }
 
-func Test_GetTotalInflow(t *testing.T) {
+func Test_GetTotalMonthlyInflow(t *testing.T) {
 	resetData()
-	expected := decimal.NewFromFloat(1666.98)
-	actual := subject.GetTotalWeeklyInflow()
+	expected := decimal.NewFromFloat(1666.98).Mul(decimal.NewFromInt(4))
+	actual := subject.GetTotalMonthlyInflow()
 	assert.Equal(t, 1, getDataCount, "getDataCount")
 	assert.Equal(t, 0, saveDataCount, "saveDataCount")
 	assert.Equal(t, expected, actual, "equality")
 }
-func Test_GetTotalOutflow(t *testing.T) {
+func Test_GetTotalMonthlyOutflow(t *testing.T) {
 	resetData()
-	expected := decimal.NewFromFloat(-334.32)
-	actual := subject.GetTotalWeeklyOutflow()
+	expected := decimal.NewFromFloat(-334.32).Mul(decimal.NewFromInt(4))
+	actual := subject.GetTotalMonthlyOutflow()
 	assert.Equal(t, 1, getDataCount, "getDataCount")
 	assert.Equal(t, 0, saveDataCount, "saveDataCount")
 	assert.Equal(t, expected, actual, "equality")
 }
 
-func Test_GetTotalFlow(t *testing.T) {
+func Test_GetTotalMonthlyFlow(t *testing.T) {
 	resetData()
-	expected := decimal.NewFromFloat(1332.66)
-	actual := subject.GetTotalWeeklyFlow()
+	expected := decimal.NewFromFloat(1332.66).Mul(decimal.NewFromInt(4))
+	actual := subject.GetTotalMonthlyFlow()
 	assert.Equal(t, 1, getDataCount, "getDataCount")
 	assert.Equal(t, 0, saveDataCount, "saveDataCount")
 	assert.Equal(t, expected, actual, "equality")
@@ -94,7 +94,7 @@ func Test_GetProjectedTotalInflow(t *testing.T) {
 	resetData()
 	a := decimal.NewFromInt(6)
 	p := period.Monthly
-	expected := decimal.NewFromFloat(1666.98).Mul(a).Mul(p.WeeklyAmount())
+	expected := decimal.NewFromFloat(1666.98).Mul(decimal.NewFromInt(4)).Mul(a).DivRound(p.MonthlyAmount(), 6)
 	actual := subject.GetProjectedTotalInflow(a, p)
 	assert.Equal(t, 1, getDataCount, "getDataCount")
 	assert.Equal(t, 0, saveDataCount, "saveDataCount")
@@ -104,7 +104,7 @@ func Test_GetProjectedTotalWeeklyOutflow(t *testing.T) {
 	resetData()
 	a := decimal.NewFromInt(6)
 	p := period.Monthly
-	expected := decimal.NewFromFloat(-334.32).Mul(a).Mul(p.WeeklyAmount())
+	expected := decimal.NewFromFloat(-334.32).Mul(decimal.NewFromInt(4)).Mul(a).DivRound(p.MonthlyAmount(), 6)
 	actual := subject.GetProjectedTotalOutflow(a, p)
 	assert.Equal(t, 1, getDataCount, "getDataCount")
 	assert.Equal(t, 0, saveDataCount, "saveDataCount")
@@ -115,7 +115,7 @@ func Test_GetProjectedTotalWeeklyFlow(t *testing.T) {
 	resetData()
 	a := decimal.NewFromInt(6)
 	p := period.Monthly
-	expected := decimal.NewFromFloat(1332.66).Mul(a).Mul(p.WeeklyAmount())
+	expected := decimal.NewFromFloat(1332.66).Mul(decimal.NewFromInt(4)).Mul(a).DivRound(p.MonthlyAmount(), 6)
 	actual := subject.GetProjectedTotalFlow(a, p)
 	assert.Equal(t, 1, getDataCount, "getDataCount")
 	assert.Equal(t, 0, saveDataCount, "saveDataCount")

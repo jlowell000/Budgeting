@@ -115,7 +115,7 @@ func displayString(f *periodicflow.PeriodicFlow) string {
 		str += "Name: " + f.Name + util.Dot +
 			"Amount: " + f.Amount.String() + util.Dot +
 			"Period: " + f.Period.String() + util.Dot +
-			"Weekly Amount: " + f.WeeklyAmount.String() + util.Dot +
+			"Monthly Amount: " + f.MonthlyAmount.String() + util.Dot +
 			"Updated: " + util.TimeFormat(f.UpdatedTimestamp)
 	}
 	return str

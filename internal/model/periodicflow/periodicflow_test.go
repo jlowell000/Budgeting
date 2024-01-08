@@ -30,7 +30,7 @@ func TestPeriodicFlowToJSON(t *testing.T) {
 			Name:             TEST_NAME,
 			Amount:           TEST_AMOUNT,
 			Period:           p,
-			WeeklyAmount:     TEST_AMOUNT,
+			MonthlyAmount:    TEST_AMOUNT,
 			UpdatedTimestamp: timestamp,
 		}
 		actual := string(periodicFlow.ToJSON())
@@ -49,7 +49,7 @@ func TestPeriodicFlowFromJSON_data_there(t *testing.T) {
 			Name:             TEST_NAME,
 			Amount:           TEST_AMOUNT,
 			Period:           p,
-			WeeklyAmount:     TEST_AMOUNT,
+			MonthlyAmount:    TEST_AMOUNT,
 			UpdatedTimestamp: timestamp,
 		}
 		actual := FromJSON([]byte(
@@ -69,7 +69,7 @@ func TestPeriodicFlowFromJSON_partial_data_there(t *testing.T) {
 			Id:               id,
 			Amount:           TEST_AMOUNT,
 			Period:           p,
-			WeeklyAmount:     TEST_AMOUNT,
+			MonthlyAmount:    TEST_AMOUNT,
 			UpdatedTimestamp: timestamp,
 		}
 		actual := FromJSON([]byte(
@@ -97,7 +97,7 @@ func TestPeriodicFlowFConstructor_properly_sets_weekly_amount(t *testing.T) {
 			Name:             TEST_NAME,
 			Amount:           TEST_AMOUNT,
 			Period:           p,
-			WeeklyAmount:     TEST_AMOUNT.Div(p.WeeklyAmount()),
+			MonthlyAmount:    TEST_AMOUNT.Mul(p.MonthlyAmount()),
 			UpdatedTimestamp: timestamp,
 		}
 		actual := *New(id, TEST_NAME, TEST_AMOUNT, p, timestamp)
@@ -113,7 +113,7 @@ func TestPeriodicFlow_Sum_different_periods(t *testing.T) {
 	var expected decimal.Decimal
 	var flows []*PeriodicFlow
 	for _, p := range period.Periods {
-		expected = expected.Add(TEST_AMOUNT.Div(p.WeeklyAmount()))
+		expected = expected.Add(TEST_AMOUNT.Mul(p.MonthlyAmount()))
 		flows = append(flows, New(id, TEST_NAME, TEST_AMOUNT, p, timestamp))
 	}
 	actual := Sum(flows)
@@ -123,16 +123,16 @@ func TestPeriodicFlow_Sum_different_periods(t *testing.T) {
 func TestPeriodicFlow_Projected_change_different_periods(t *testing.T) {
 	id := getUUID(TEST_ID)
 	timestamp := getTime(TEST_TIME)
-	projectAmount := decimal.NewFromFloat(30.0)
-	projectPeriod := period.Monthly
+	projectAmount := decimal.NewFromFloat(6.0)
+	projectPeriod := period.Weekly
 
 	var expected decimal.Decimal
 	var flows []*PeriodicFlow
 	for _, p := range period.Periods {
-		expected = expected.Add(TEST_AMOUNT.Div(p.WeeklyAmount()))
+		expected = expected.Add(TEST_AMOUNT.Mul(p.MonthlyAmount()))
 		flows = append(flows, New(id, TEST_NAME, TEST_AMOUNT, p, timestamp))
 	}
-	expected = expected.Mul(projectAmount).Mul(projectPeriod.WeeklyAmount())
+	expected = expected.Mul(projectAmount).DivRound(projectPeriod.MonthlyAmount(), 6)
 	actual := ProjectedChange(flows, projectAmount, projectPeriod)
 	fmt.Printf("expected: %s, actual: %s", expected.String(), actual.String())
 	assert.Equal(t, expected, actual)
@@ -175,7 +175,7 @@ func getTestJson(
 		"\"name\":\"" + name + "\"," +
 		"\"amount\":\"" + amount.String() + "\"," +
 		"\"period\":\"" + p.String() + "\"," +
-		"\"weekly_amount\":\"" + weeklyAmount.String() + "\"," +
+		"\"monthly_amount\":\"" + weeklyAmount.String() + "\"," +
 		"\"updated_timestamp\":\"" + time + "\"}"
 }
 

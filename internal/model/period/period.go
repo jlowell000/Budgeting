@@ -75,19 +75,19 @@ func PeriodFromText(text string) Period {
 /*
 Get the Period for a given string.
 */
-func (p *Period) WeeklyAmount() decimal.Decimal {
+func (p *Period) MonthlyAmount() decimal.Decimal {
 	switch *p {
 	default:
 		return decimal.NewFromInt(1)
 	case Unknown:
 		return decimal.NewFromInt(1)
 	case Daily:
-		return decimal.NewFromInt(1).Div(decimal.NewFromInt(7))
+		return decimal.NewFromInt(30)
 	case Weekly:
-		return decimal.NewFromInt(1)
+		return decimal.NewFromInt(4)
 	case Monthly:
-		return decimal.NewFromInt(52).Div(decimal.NewFromInt(12))
+		return decimal.NewFromInt(1)
 	case Yearly:
-		return decimal.NewFromInt(52)
+		return decimal.NewFromInt(1).Div(decimal.NewFromInt(12))
 	}
 }

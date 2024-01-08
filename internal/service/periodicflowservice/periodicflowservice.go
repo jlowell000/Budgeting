@@ -51,15 +51,15 @@ func (p *PeriodicFlowService) GetAllSortedByDate() []*periodicflow.PeriodicFlow 
 	return f
 }
 
-func (p *PeriodicFlowService) GetTotalWeeklyInflow() decimal.Decimal {
+func (p *PeriodicFlowService) GetTotalMonthlyInflow() decimal.Decimal {
 	return periodicflow.Sum(getPositiveFlows(p.Dataservice.GetData().Flows))
 }
 
-func (p *PeriodicFlowService) GetTotalWeeklyOutflow() decimal.Decimal {
+func (p *PeriodicFlowService) GetTotalMonthlyOutflow() decimal.Decimal {
 	return periodicflow.Sum(getNegativeFlows(p.Dataservice.GetData().Flows))
 }
 
-func (p *PeriodicFlowService) GetTotalWeeklyFlow() decimal.Decimal {
+func (p *PeriodicFlowService) GetTotalMonthlyFlow() decimal.Decimal {
 	return periodicflow.Sum(p.Dataservice.GetData().Flows)
 }
 
