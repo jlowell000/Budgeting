@@ -24,4 +24,4 @@ Budgeting
 data.json
 cmd/cli/entrylist.json
 stringer
-# build/*
+build/*
